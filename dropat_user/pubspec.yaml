@@ -1,0 +1,61 @@
+name: finaltouch
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Cupertino icons for iOS-style icons
+  cupertino_icons: ^1.0.8
+
+  # Firebase dependencies
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.0.0
+  cloud_firestore: ^5.0.0
+  google_sign_in: ^6.2.1
+  
+  sign_in_with_apple: ^6.1.0
+
+  # Google Maps support
+  google_maps_flutter: ^2.9.0
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+   
+
+  # HTTP requests
+  http: ^0.13.6
+
+  # search suggestions UI
+  flutter_typeahead: ^4.1.1
+
+
+  # For SVG splash and vector graphics
+  flutter_svg: ^2.0.9
+
+  # For animations or smooth transitions (optional but useful later)
+  animations: ^2.0.11
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Add your assets here
+  assets:
+    - assets/images/splash_screen.svg
+    - assets/images/signup_illustration.svg
+    - assets/images/login_illustration.svg
+    - assets/images/dropat_logo.svg
+    - assets/images/login_people.svg
+    - assets/icons/google_icon.svg
+    - assets/icons/apple_icon.svg
+    - assets/icons/phone_icon.svg

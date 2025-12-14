@@ -1,0 +1,28 @@
+# Flutter
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GoogleService-Info.plist
+
+# Android
+**/android/local.properties
+**/android/app/google-services.json
+
+# Firebase
+**/firebase_options.dart
+
+# Environment files
+.env
+.env.*
+
+# Mac / OS
+.DS_Store
