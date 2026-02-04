@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import 'signup_screen.dart';
-import 'login_screen.dart';
 import 'phone_login_screen.dart';
 
 class LoginOptionsScreen extends StatelessWidget {
@@ -10,20 +10,17 @@ class LoginOptionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF7AAB98), // Mint background
+      backgroundColor: const Color(0xFF7AAB98),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const SizedBox(height: 60),
 
-            // 🔹 Logo Section
+            // LOGO
             Column(
               children: [
-                SvgPicture.asset(
-                  'assets/images/dropat_logo.svg', // your Dropat logo SVG
-                  height: 100,
-                ),
+                SvgPicture.asset('assets/images/dropat_logo.svg', height: 100),
                 const SizedBox(height: 10),
                 const Text(
                   "Dropat",
@@ -36,61 +33,48 @@ class LoginOptionsScreen extends StatelessWidget {
               ],
             ),
 
-            // 🔹 Bottom Section (Buttons & Illustration)
+            // ACTIONS
             Column(
               children: [
-                SvgPicture.asset(
-                  'assets/images/login_people.svg', // illustration of people/bikes
-                  height: 220,
-                ),
+                SvgPicture.asset('assets/images/login_people.svg', height: 220),
                 const SizedBox(height: 30),
 
-                // ✅ Google Login Button (UI only)
+                // GOOGLE (DISABLED – PHASE 2)
                 _buildLoginButton(
-                  context,
                   icon: 'assets/icons/google_icon.svg',
                   label: 'Login with Google',
                   color: Colors.white,
                   textColor: Colors.black,
                   onTap: () {
-                    // For now, just show info message
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          'Google Sign-In coming soon!',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Colors.black87,
+                        content: Text('Google login will be enabled soon'),
+                        backgroundColor: Colors.black,
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 16),
 
-                // ✅ Apple Login Button (UI only)
+                // APPLE (DISABLED – PHASE 2)
                 _buildLoginButton(
-                  context,
                   icon: 'assets/icons/apple_icon.svg',
                   label: 'Login with Apple',
-                  color: const Color.fromARGB(255, 110, 107, 107),
+                  color: const Color(0xFF6E6B6B),
                   textColor: Colors.white,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          'Apple Sign-In coming soon!',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: Color.fromARGB(221, 110, 108, 108),
+                        content: Text('Apple login will be enabled soon'),
+                        backgroundColor: Colors.black,
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 16),
 
-                // ✅ Phone Login Button (goes to login screen)
+                // PHONE LOGIN (ACTIVE – PHASE 1)
                 _buildLoginButton(
-                  context,
                   icon: 'assets/icons/phone_icon.svg',
                   label: 'Login with Phone Number',
                   color: Colors.white,
@@ -105,10 +89,9 @@ class LoginOptionsScreen extends StatelessWidget {
                   },
                 ),
 
-                // ✅ Phone Login Button (goes to phone auth screen)
                 const SizedBox(height: 20),
 
-                // ✅ Sign Up link
+                // SIGN UP
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -136,6 +119,7 @@ class LoginOptionsScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 40),
               ],
             ),
@@ -145,9 +129,8 @@ class LoginOptionsScreen extends StatelessWidget {
     );
   }
 
-  /// Reusable Login Button Builder
-  Widget _buildLoginButton(
-    BuildContext context, {
+  // BUTTON BUILDER
+  Widget _buildLoginButton({
     required String icon,
     required String label,
     required Color color,

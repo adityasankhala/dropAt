@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
-import 'screens/login_options_screen.dart'; // first onboarding screen
+import 'screens/login_options_screen.dart';
 import 'screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // ⚡ Force logout every time you rebuild (for demo/testing)
+  // ❗ KEEP THIS ONLY DURING DEVELOPMENT
+  // ❗ REMOVE before production / TestFlight
   await FirebaseAuth.instance.signOut();
 
   runApp(const DropAtApp());
@@ -25,18 +27,10 @@ class DropAtApp extends StatelessWidget {
       title: 'DropAt',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF7AAB98), // mint background
+        scaffoldBackgroundColor: const Color(0xFF7AAB98),
         colorScheme: const ColorScheme.light(
           primary: Color(0xFF7AAB98),
           secondary: Colors.black,
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.black),
-          bodyMedium: TextStyle(color: Colors.black87),
-          titleLarge: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
         ),
       ),
       home: const RootApp(),
@@ -44,7 +38,7 @@ class DropAtApp extends StatelessWidget {
   }
 }
 
-/// 🌟 RootApp decides which screen to show
+/// 🔑 ROOT AUTH DECIDER (DO NOT USE const SCREENS INSIDE)
 class RootApp extends StatelessWidget {
   const RootApp({super.key});
 
@@ -53,18 +47,18 @@ class RootApp extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // ⏳ While Firebase initializes → show Splash
+        // ⏳ Firebase booting
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SplashScreen();
         }
 
-        // 🔓 If user logged in → show Home
+        // ✅ USER LOGGED IN
         if (snapshot.hasData) {
-          return const SplashScreen(nextScreen: HomeScreen());
+          return SplashScreen(nextScreen: HomeScreen());
         }
 
-        // 🔐 If user NOT logged in → show onboarding login options
-        return const SplashScreen(nextScreen: LoginOptionsScreen());
+        // ❌ USER NOT LOGGED IN
+        return SplashScreen(nextScreen: LoginOptionsScreen());
       },
     );
   }

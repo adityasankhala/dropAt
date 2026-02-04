@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
   const PhoneLoginScreen({super.key});
@@ -17,56 +16,124 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   bool _otpSent = false;
   bool _loading = false;
 
-  Future<void> _verifyPhone() async {
-    setState(() => _loading = true);
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: _phoneController.text.trim(),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await FirebaseAuth.instance.signInWithCredential(credential);
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: ${e.message}")));
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _otpSent = true;
-          _verificationId = verificationId;
-          _loading = false;
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        _verificationId = verificationId;
-      },
-    );
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _otpController.dispose();
+    super.dispose();
   }
 
-  Future<void> _verifyOTP() async {
-    if (_verificationId == null) return;
+  // 📞 FORMAT + VALIDATE PHONE
+  String _formatPhone(String phone) {
+    phone = phone.replaceAll(' ', '').trim();
+
+    if (phone.length < 10) {
+      throw Exception('Enter valid phone number');
+    }
+
+    if (!phone.startsWith('+')) {
+      return '+91$phone';
+    }
+    return phone;
+  }
+
+  // 📲 SEND OTP
+  Future<void> _sendOTP() async {
+    if (_loading) return;
+
+    debugPrint('📲 [OTP] Starting OTP flow...');
     setState(() => _loading = true);
+
+    late String formattedPhone;
+
+    try {
+      formattedPhone = _formatPhone(_phoneController.text);
+      debugPrint('📲 [OTP] Formatted phone: $formattedPhone');
+    } catch (e) {
+      debugPrint('❌ [OTP] Phone format error: $e');
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid phone number')));
+      return;
+    }
+
+    try {
+      debugPrint('📲 [OTP] Calling verifyPhoneNumber...');
+      
+      // Enable test mode for Firebase test phone numbers
+      // This allows testing without APNs configuration
+      FirebaseAuth.instance.setSettings(appVerificationDisabledForTesting: true);
+      
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: formattedPhone,
+        timeout: const Duration(seconds: 120),
+
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          debugPrint('✅ [OTP] Auto-verification completed!');
+          await FirebaseAuth.instance.signInWithCredential(credential);
+          if (!mounted) return;
+          setState(() => _loading = false);
+          Navigator.pop(context); // RootApp decides next screen
+        },
+
+        verificationFailed: (FirebaseAuthException e) {
+          debugPrint('❌ [OTP] Verification FAILED: ${e.code} - ${e.message}');
+          if (!mounted) return;
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.message ?? 'Verification failed')),
+          );
+        },
+
+        codeSent: (String verificationId, int? resendToken) {
+          debugPrint('✅ [OTP] Code sent! VerificationId: $verificationId');
+          if (!mounted) return;
+          setState(() {
+            _verificationId = verificationId;
+            _otpSent = true;
+            _loading = false;
+          });
+        },
+
+        codeAutoRetrievalTimeout: (String verificationId) {
+          debugPrint('⏱️ [OTP] Auto-retrieval timeout');
+          _verificationId = verificationId;
+        },
+      );
+      debugPrint('📲 [OTP] verifyPhoneNumber call completed (awaited)');
+    } catch (e) {
+      debugPrint('❌ [OTP] EXCEPTION: $e');
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+
+  // 🔑 VERIFY OTP
+  Future<void> _verifyOTP() async {
+    if (_verificationId == null || _loading) return;
+
+    setState(() => _loading = true);
+
     try {
       final credential = PhoneAuthProvider.credential(
         verificationId: _verificationId!,
         smsCode: _otpController.text.trim(),
       );
+
       await FirebaseAuth.instance.signInWithCredential(credential);
+
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Navigator.pop(context); // RootApp routes automatically
     } on FirebaseAuthException catch (e) {
+      setState(() => _loading = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Invalid OTP: ${e.message}")));
-    } finally {
-      setState(() => _loading = false);
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Invalid OTP')));
     }
   }
 
@@ -90,12 +157,13 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Phone Number Input
+              // 📱 PHONE INPUT
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
+                enabled: !_otpSent,
                 decoration: InputDecoration(
-                  hintText: "+91 9876543210",
+                  hintText: "9876543210",
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -104,8 +172,10 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
+              // 🔢 OTP INPUT
               if (_otpSent)
                 TextField(
                   controller: _otpController,
@@ -123,25 +193,32 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
 
               const SizedBox(height: 30),
 
-              ElevatedButton(
-                onPressed: _loading
-                    ? null
-                    : _otpSent
-                    ? _verifyOTP
-                    : _verifyPhone,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // 🚀 ACTION BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: _loading
+                      ? null
+                      : _otpSent
+                      ? _verifyOTP
+                      : _sendOTP,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  child: _loading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          _otpSent ? "Verify OTP" : "Send OTP",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
-                child: _loading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        _otpSent ? "Verify OTP" : "Send OTP",
-                        style: const TextStyle(color: Colors.white),
-                      ),
               ),
             ],
           ),
