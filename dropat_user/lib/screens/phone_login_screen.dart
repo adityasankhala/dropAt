@@ -38,6 +38,8 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 
   // 📲 SEND OTP
+  int? _forceResendingToken;
+  
   Future<void> _sendOTP() async {
     if (_loading) return;
 
@@ -61,20 +63,30 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
     try {
       debugPrint('📲 [OTP] Calling verifyPhoneNumber...');
       
-      // Enable test mode for Firebase test phone numbers
-      // This allows testing without APNs configuration
-      FirebaseAuth.instance.setSettings(appVerificationDisabledForTesting: true);
+      // Enable test mode for Firebase test phone numbers (iOS)
+      await FirebaseAuth.instance.setSettings(
+        appVerificationDisabledForTesting: true,
+        forceRecaptchaFlow: true,
+      );
+      debugPrint('📲 [OTP] Settings applied, starting verification...');
       
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: formattedPhone,
-        timeout: const Duration(seconds: 120),
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: _forceResendingToken,
 
         verificationCompleted: (PhoneAuthCredential credential) async {
           debugPrint('✅ [OTP] Auto-verification completed!');
-          await FirebaseAuth.instance.signInWithCredential(credential);
-          if (!mounted) return;
-          setState(() => _loading = false);
-          Navigator.pop(context); // RootApp decides next screen
+          try {
+            await FirebaseAuth.instance.signInWithCredential(credential);
+            if (!mounted) return;
+            setState(() => _loading = false);
+            Navigator.pop(context);
+          } catch (e) {
+            debugPrint('❌ [OTP] Sign-in error: $e');
+            if (!mounted) return;
+            setState(() => _loading = false);
+          }
         },
 
         verificationFailed: (FirebaseAuthException e) {
@@ -89,6 +101,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
         codeSent: (String verificationId, int? resendToken) {
           debugPrint('✅ [OTP] Code sent! VerificationId: $verificationId');
           if (!mounted) return;
+          _forceResendingToken = resendToken;
           setState(() {
             _verificationId = verificationId;
             _otpSent = true;
@@ -97,11 +110,22 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
         },
 
         codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint('⏱️ [OTP] Auto-retrieval timeout');
-          _verificationId = verificationId;
+          debugPrint('⏱️ [OTP] Auto-retrieval timeout: $verificationId');
+          if (!mounted) return;
+          setState(() {
+            _verificationId = verificationId;
+            _loading = false;
+          });
         },
       );
-      debugPrint('📲 [OTP] verifyPhoneNumber call completed (awaited)');
+      debugPrint('📲 [OTP] verifyPhoneNumber call completed');
+    } on FirebaseAuthException catch (e) {
+      debugPrint('❌ [OTP] FirebaseAuthException: ${e.code} - ${e.message}');
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Auth error')),
+      );
     } catch (e) {
       debugPrint('❌ [OTP] EXCEPTION: $e');
       if (!mounted) return;
