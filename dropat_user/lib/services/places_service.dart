@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PlacesService {
-  // 🔴 REPLACE WITH YOUR REAL GOOGLE MAPS API KEY
-  static const String _apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+  // Google Maps API Key
+  static const String apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
 
   /// AUTOCOMPLETE SUGGESTIONS
   static Future<List<Map<String, dynamic>>> getSuggestions(String input) async {
@@ -12,7 +12,7 @@ class PlacesService {
     final url =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json'
         '?input=${Uri.encodeComponent(input)}'
-        '&key=$_apiKey'
+        '&key=$apiKey'
         '&components=country:in';
 
     final response = await http.get(Uri.parse(url));
@@ -31,7 +31,7 @@ class PlacesService {
     final url =
         'https://maps.googleapis.com/maps/api/place/details/json'
         '?place_id=$placeId'
-        '&key=$_apiKey'
+        '&key=$apiKey'
         '&fields=formatted_address,geometry';
 
     final response = await http.get(Uri.parse(url));

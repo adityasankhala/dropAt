@@ -18,23 +18,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     setState(() => _loading = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
+        navigator.pushReplacement(
           MaterialPageRoute(builder: (_) => HomeScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+      messenger.showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 

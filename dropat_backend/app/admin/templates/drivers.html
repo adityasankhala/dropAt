@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Drivers — DropAt Admin{% endblock %}
+{% block page_title %}Drivers{% endblock %}
+
+{% block content %}
+<p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">{{ drivers|length }} driver{{ 's' if drivers|length != 1 }}</p>
+
+<div class="card">
+    {% if drivers %}
+    <table>
+        <thead>
+            <tr>
+                <th>Driver</th>
+                <th>License</th>
+                <th>Vehicle</th>
+                <th>Status</th>
+                <th>Trips</th>
+                <th>Earnings</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in drivers %}
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--success),#16a34a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;">
+                            {{ driver.user.name[0]|upper if driver.user else '?' }}
+                        </div>
+                        <div>
+                            <div style="color:var(--text-primary); font-weight:500;">{{ driver.user.name if driver.user else 'Unknown' }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">{{ driver.user.phone if driver.user else '' }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ driver.license_number or '—' }}</td>
+                <td>
+                    {% if driver.vehicle %}
+                    {{ driver.vehicle.name }} • {{ driver.vehicle.number_plate }}
+                    {% else %}
+                    <span style="color:var(--text-muted);">No vehicle</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status {{ 'status-active' if driver.is_online else 'status-inactive' }}">
+                        {{ 'Online' if driver.is_online else 'Offline' }}
+                    </span>
+                </td>
+                <td style="font-weight:600;">{{ driver.total_trips }}</td>
+                <td style="font-weight:600;">₹{{ "%.0f"|format(driver.total_earnings) }}</td>
+                <td>{{ driver.created_at.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-steering-2-line"></i>
+        <p>No drivers registered yet. Drivers will appear here once onboarded.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

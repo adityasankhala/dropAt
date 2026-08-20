@@ -63,12 +63,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
     try {
       debugPrint('📲 [OTP] Calling verifyPhoneNumber...');
       
-      // Enable test mode for Firebase test phone numbers (iOS)
-      await FirebaseAuth.instance.setSettings(
-        appVerificationDisabledForTesting: true,
-        forceRecaptchaFlow: true,
-      );
-      debugPrint('📲 [OTP] Settings applied, starting verification...');
+      debugPrint('📲 [OTP] Starting verification...');
       
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: formattedPhone,

@@ -1,5 +1,5 @@
 name: finaltouch
-description: "A new Flutter project."
+description: "DropAt - Campus Ride Sharing App"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -19,7 +19,6 @@ dependencies:
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.0.0
   google_sign_in: ^6.2.1
-  
   sign_in_with_apple: ^6.1.0
 
   # Google Maps support
@@ -27,20 +26,24 @@ dependencies:
   geolocator: ^13.0.1
   geocoding: ^3.0.0
   flutter_polyline_points: ^2.0.0
-   
 
   # HTTP requests
-  http: ^1.2.1
+  http: ^1.6.0
 
   # search suggestions UI
   flutter_typeahead: ^4.1.1
 
-
   # For SVG splash and vector graphics
   flutter_svg: ^2.0.9
 
-  # For animations or smooth transitions (optional but useful later)
+  # For animations or smooth transitions
   animations: ^2.0.11
+
+  # Intl for date formatting
+  intl: ^0.19.0
+  supabase_flutter: ^2.17.2
+  razorpay_flutter: ^1.4.5
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -50,7 +53,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Add your assets here
+  # Assets
   assets:
     - assets/images/splash_screen.svg
     - assets/images/signup_illustration.svg

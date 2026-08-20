@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Bookings — DropAt Admin{% endblock %}
+{% block page_title %}Bookings{% endblock %}
+
+{% block content %}
+<p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">{{ bookings|length }} booking{{ 's' if bookings|length != 1 }}</p>
+
+<div class="card">
+    {% if bookings %}
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Route</th>
+                <th>Type</th>
+                <th>Boarding → Alighting</th>
+                <th>Fare</th>
+                <th>Paid</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td style="color:var(--text-primary); font-weight:500;">
+                    {{ b.user.name if b.user else 'Unknown' }}
+                </td>
+                <td>{{ b.trip.route.name if b.trip and b.trip.route else '—' }}</td>
+                <td>
+                    <span class="status status-{{ 'active' if b.booking_type == 'SHUTTLE' else 'started' }}">
+                        {{ b.booking_type }}
+                    </span>
+                </td>
+                <td style="font-size:12px;">
+                    {{ b.boarding_stop_name or '—' }} → {{ b.alighting_stop_name or '—' }}
+                </td>
+                <td>₹{{ "%.0f"|format(b.fare) }}</td>
+                <td style="font-weight:600;">₹{{ "%.0f"|format(b.total_paid) }}</td>
+                <td><span class="status status-{{ b.status|lower }}">{{ b.status }}</span></td>
+                <td>{{ b.created_at.strftime('%d %b, %I:%M %p') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-ticket-2-line"></i>
+        <p>No bookings yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

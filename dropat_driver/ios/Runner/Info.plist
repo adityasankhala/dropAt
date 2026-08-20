@@ -48,7 +48,20 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
         <string>Location is required to share live position during trip.</string>
 
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
         <string>Location is required to share live position during trip.</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.22433737402-frbka0gie8tg47qpvm9ov6k9h8vt4bpu</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

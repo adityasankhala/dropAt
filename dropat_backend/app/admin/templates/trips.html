@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Trips — DropAt Admin{% endblock %}
+{% block page_title %}Trips{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <p style="color:var(--text-secondary); font-size:14px;">{{ trips|length }} trip{{ 's' if trips|length != 1 }}</p>
+    <button class="btn btn-primary" onclick="openModal('createTripModal')">
+        <i class="ri-add-line"></i> Schedule Trip
+    </button>
+</div>
+
+<div class="card">
+    {% if trips %}
+    <table>
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Date</th>
+                <th>Departure</th>
+                <th>Seats</th>
+                <th>Booked</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in trips %}
+            <tr>
+                <td style="color:var(--text-primary); font-weight:500;">
+                    {{ trip.route.name if trip.route else 'N/A' }}
+                </td>
+                <td>{{ trip.trip_date.strftime('%d %b %Y') }}</td>
+                <td style="font-weight:600;">{{ trip.departure_time.strftime('%I:%M %p') }}</td>
+                <td>{{ trip.total_seats }}</td>
+                <td>
+                    <span style="font-weight:600; color:{{ 'var(--danger)' if trip.booked_seats >= trip.total_seats else 'var(--text-primary)' }};">
+                        {{ trip.booked_seats }}/{{ trip.total_seats }}
+                    </span>
+                </td>
+                <td><span class="status status-{{ trip.status|lower }}">{{ trip.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-bus-line"></i>
+        <p>No trips scheduled yet. Create a trip for an existing route.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Trip Modal -->
+<div id="createTripModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Schedule New Trip</h3>
+            <button class="modal-close" onclick="closeModal('createTripModal')">&times;</button>
+        </div>
+        <form method="POST" action="/admin/trips/create">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Route</label>
+                    <select name="route_id" class="form-control" required>
+                        <option value="">Select a route...</option>
+                        {% for route in routes %}
+                        <option value="{{ route.id }}">{{ route.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Trip Date</label>
+                        <input type="date" name="trip_date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Departure Time</label>
+                        <input type="time" name="departure_time" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Total Seats</label>
+                    <input type="number" name="total_seats" class="form-control" value="25" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('createTripModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Schedule Trip</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

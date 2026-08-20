@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'signup_screen.dart';
 import 'phone_login_screen.dart';
+import '../services/google_auth_service.dart';
 
 class LoginOptionsScreen extends StatelessWidget {
   const LoginOptionsScreen({super.key});
@@ -39,19 +40,32 @@ class LoginOptionsScreen extends StatelessWidget {
                 SvgPicture.asset('assets/images/login_people.svg', height: 220),
                 const SizedBox(height: 30),
 
-                // GOOGLE (DISABLED – PHASE 2)
+                // GOOGLE LOGIN
                 _buildLoginButton(
                   icon: 'assets/icons/google_icon.svg',
                   label: 'Login with Google',
                   color: Colors.white,
                   textColor: Colors.black,
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Google login will be enabled soon'),
-                        backgroundColor: Colors.black,
-                      ),
-                    );
+                  onTap: () async {
+                    try {
+                      final result = await GoogleAuthService.signIn();
+                      if (result == null && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Sign-in cancelled'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                      // If result != null, StreamBuilder in main.dart 
+                      // auto-navigates to MainShell
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Google Login failed: $e')),
+                        );
+                      }
+                    }
                   },
                 ),
                 const SizedBox(height: 16),

@@ -27,6 +27,8 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     setState(() => _loading = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -34,17 +36,14 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
+        navigator.pushReplacement(
           MaterialPageRoute(builder: (_) => HomeScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Signup failed')));
+      messenger.showSnackBar(SnackBar(content: Text(e.message ?? 'Signup failed')));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 

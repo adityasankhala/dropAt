@@ -3,17 +3,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_options.dart';
+import 'services/supabase_service.dart';
+import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_options_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // ❗ KEEP THIS ONLY DURING DEVELOPMENT
-  // ❗ REMOVE before production / TestFlight
-  await FirebaseAuth.instance.signOut();
+  await SupabaseService.initialize();
 
   runApp(const DropAtApp());
 }
@@ -26,39 +25,54 @@ class DropAtApp extends StatelessWidget {
     return MaterialApp(
       title: 'DropAt',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF7AAB98),
-        colorScheme: const ColorScheme.light(
-          primary: Color(0xFF7AAB98),
-          secondary: Colors.black,
-        ),
-      ),
+      theme: DropAtTheme.lightTheme,
       home: const RootApp(),
     );
   }
 }
 
-/// 🔑 ROOT AUTH DECIDER (DO NOT USE const SCREENS INSIDE)
-class RootApp extends StatelessWidget {
+/// 🔑 ROOT AUTH DECIDER
+class RootApp extends StatefulWidget {
   const RootApp({super.key});
 
   @override
+  State<RootApp> createState() => _RootAppState();
+}
+
+class _RootAppState extends State<RootApp> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Show splash for 2.8 seconds on cold start, then reveal the auth-based screen
+    Future.delayed(const Duration(milliseconds: 2800), () {
+      if (mounted) setState(() => _showSplash = false);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Show splash on cold start
+    if (_showSplash) {
+      return const SplashScreen();
+    }
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // ⏳ Firebase booting
+        // ⏳ Firebase still initializing
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const SplashScreen();
         }
 
-        // ✅ USER LOGGED IN
+        // ✅ USER LOGGED IN → MainShell
         if (snapshot.hasData) {
-          return SplashScreen(nextScreen: HomeScreen());
+          return const MainShell();
         }
 
-        // ❌ USER NOT LOGGED IN
-        return SplashScreen(nextScreen: LoginOptionsScreen());
+        // ❌ USER NOT LOGGED IN → Login
+        return const LoginOptionsScreen();
       },
     );
   }

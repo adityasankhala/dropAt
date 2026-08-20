@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Vouchers — DropAt Admin{% endblock %}
+{% block page_title %}Vouchers{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <p style="color:var(--text-secondary); font-size:14px;">{{ vouchers|length }} voucher{{ 's' if vouchers|length != 1 }}</p>
+    <button class="btn btn-primary" onclick="openModal('createVoucherModal')">
+        <i class="ri-add-line"></i> New Voucher
+    </button>
+</div>
+
+<div class="card">
+    {% if vouchers %}
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Discount</th>
+                <th>Min Order</th>
+                <th>Usage</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in vouchers %}
+            <tr>
+                <td>
+                    <code style="background:var(--bg-primary); padding:4px 8px; border-radius:4px; font-weight:700; color:var(--accent-hover); font-size:13px;">
+                        {{ v.code }}
+                    </code>
+                </td>
+                <td>{{ v.description }}</td>
+                <td style="font-weight:600;">
+                    {% if v.is_percentage %}
+                    {{ "%.0f"|format(v.discount_amount) }}%
+                    {% if v.max_discount %}<span style="font-size:11px;color:var(--text-muted);"> (max ₹{{ "%.0f"|format(v.max_discount) }})</span>{% endif %}
+                    {% else %}
+                    ₹{{ "%.0f"|format(v.discount_amount) }}
+                    {% endif %}
+                </td>
+                <td>₹{{ "%.0f"|format(v.min_order_amount) }}</td>
+                <td>
+                    <span style="font-weight:600;">{{ v.used_count }}</span>
+                    <span style="color:var(--text-muted);">/ {{ v.usage_limit }}</span>
+                </td>
+                <td>{{ v.valid_until.strftime('%d %b %Y') }}</td>
+                <td>
+                    <span class="status {{ 'status-active' if v.is_active else 'status-inactive' }}">
+                        {{ 'Active' if v.is_active else 'Disabled' }}
+                    </span>
+                </td>
+                <td>
+                    <form method="POST" action="/admin/vouchers/{{ v.id }}/toggle" style="display:inline;">
+                        <button type="submit" class="btn btn-ghost btn-sm">
+                            {{ 'Disable' if v.is_active else 'Enable' }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-coupon-3-line"></i>
+        <p>No vouchers created yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Voucher Modal -->
+<div id="createVoucherModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Create New Voucher</h3>
+            <button class="modal-close" onclick="closeModal('createVoucherModal')">&times;</button>
+        </div>
+        <form method="POST" action="/admin/vouchers/create">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Promo Code</label>
+                        <input type="text" name="code" class="form-control" placeholder="e.g. SUMMER50" required style="text-transform:uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>Usage Limit</label>
+                        <input type="number" name="usage_limit" class="form-control" value="100" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" name="description" class="form-control" placeholder="50% off your first ride">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Discount Amount</label>
+                        <input type="number" name="discount_amount" class="form-control" value="50" step="5" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select name="is_percentage" class="form-control">
+                            <option value="true">Percentage (%)</option>
+                            <option value="false">Flat Amount (₹)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Min Order Amount (₹)</label>
+                        <input type="number" name="min_order_amount" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Discount (₹)</label>
+                        <input type="number" name="max_discount" class="form-control" value="0" min="0" placeholder="0 = no cap">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Valid Until</label>
+                    <input type="date" name="valid_until" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('createVoucherModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Voucher</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
