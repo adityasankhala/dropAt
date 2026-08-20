@@ -3,7 +3,9 @@
 {% block page_title %}Drivers{% endblock %}
 
 {% block content %}
-<p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">{{ drivers|length }} driver{{ 's' if drivers|length != 1 }}</p>
+<div class="toolbar">
+    <span class="toolbar-count">{{ drivers|length }} driver{{ 's' if drivers|length != 1 }}</span>
+</div>
 
 <div class="card">
     {% if drivers %}
@@ -24,38 +26,38 @@
             <tr>
                 <td>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--success),#16a34a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;">
-                            {{ driver.user.name[0]|upper if driver.user else '?' }}
-                        </div>
+                        <div class="avatar">{{ driver.user.name[0]|upper if driver.user else '?' }}</div>
                         <div>
-                            <div style="color:var(--text-primary); font-weight:500;">{{ driver.user.name if driver.user else 'Unknown' }}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">{{ driver.user.phone if driver.user else '' }}</div>
+                            <div class="cell-main">{{ driver.user.name if driver.user else 'Unknown' }}</div>
+                            <div class="cell-sub">{{ driver.user.phone if driver.user else '' }}</div>
                         </div>
                     </div>
                 </td>
-                <td>{{ driver.license_number or '—' }}</td>
+                <td class="cell-mono">{{ driver.license_number or '—' }}</td>
                 <td>
                     {% if driver.vehicle %}
-                    {{ driver.vehicle.name }} • {{ driver.vehicle.number_plate }}
+                    {{ driver.vehicle.name }} · {{ driver.vehicle.number_plate }}
                     {% else %}
-                    <span style="color:var(--text-muted);">No vehicle</span>
+                    <span style="color:var(--gray-400);">No vehicle</span>
                     {% endif %}
                 </td>
                 <td>
-                    <span class="status {{ 'status-active' if driver.is_online else 'status-inactive' }}">
-                        {{ 'Online' if driver.is_online else 'Offline' }}
-                    </span>
+                    {% if driver.is_online %}
+                    <span class="badge badge-green">Online</span>
+                    {% else %}
+                    <span class="badge badge-gray">Offline</span>
+                    {% endif %}
                 </td>
-                <td style="font-weight:600;">{{ driver.total_trips }}</td>
-                <td style="font-weight:600;">₹{{ "%.0f"|format(driver.total_earnings) }}</td>
+                <td class="cell-main">{{ driver.total_trips }}</td>
+                <td class="cell-main">₹{{ "%.0f"|format(driver.total_earnings) }}</td>
                 <td>{{ driver.created_at.strftime('%d %b %Y') }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <div class="empty-state">
-        <i class="ri-steering-2-line"></i>
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
         <p>No drivers registered yet. Drivers will appear here once onboarded.</p>
     </div>
     {% endif %}

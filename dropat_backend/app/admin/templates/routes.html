@@ -3,10 +3,11 @@
 {% block page_title %}Routes{% endblock %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <p style="color:var(--text-secondary); font-size:14px;">{{ routes|length }} route{{ 's' if routes|length != 1 }}</p>
+<div class="toolbar">
+    <span class="toolbar-count">{{ routes|length }} route{{ 's' if routes|length != 1 }}</span>
     <button class="btn btn-primary" onclick="openModal('createRouteModal')">
-        <i class="ri-add-line"></i> New Route
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Route
     </button>
 </div>
 
@@ -28,80 +29,82 @@
             {% for route in routes %}
             <tr>
                 <td>
-                    <div style="color:var(--text-primary); font-weight:600;">{{ route.name }}</div>
-                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">{{ route.description or '' }}</div>
+                    <div class="cell-main">{{ route.name }}</div>
+                    {% if route.description %}<div class="cell-sub">{{ route.description }}</div>{% endif %}
                 </td>
-                <td style="font-weight:600;">₹{{ "%.0f"|format(route.price) }}</td>
+                <td class="cell-main">₹{{ "%.0f"|format(route.price) }}</td>
                 <td>{{ route.total_seats }}</td>
                 <td>{{ route.estimated_duration_min or '—' }} min</td>
                 <td>
                     {% for w in route.waypoints %}
-                    <span style="font-size:11px;">{{ w.name }}{% if not loop.last %} → {% endif %}</span>
+                    <span style="font-size:12px;">{{ w.name }}{% if not loop.last %} → {% endif %}</span>
                     {% endfor %}
                 </td>
                 <td>
-                    <span class="status {{ 'status-active' if route.is_active else 'status-inactive' }}">
-                        {{ 'Active' if route.is_active else 'Inactive' }}
-                    </span>
+                    {% if route.is_active %}
+                    <span class="badge badge-green">Active</span>
+                    {% else %}
+                    <span class="badge badge-red">Inactive</span>
+                    {% endif %}
                 </td>
                 <td>
-                    <form method="POST" action="/admin/routes/{{ route.id }}/toggle" style="display:inline;">
-                        <button type="submit" class="btn btn-ghost btn-sm">
-                            {{ 'Disable' if route.is_active else 'Enable' }}
-                        </button>
-                    </form>
-                    <form method="POST" action="/admin/routes/{{ route.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this route?')">
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="ri-delete-bin-6-line"></i>
-                        </button>
-                    </form>
+                    <div style="display:flex; gap:6px;">
+                        <form method="POST" action="/admin/routes/{{ route.id }}/toggle">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                {{ 'Disable' if route.is_active else 'Enable' }}
+                            </button>
+                        </form>
+                        <form method="POST" action="/admin/routes/{{ route.id }}/delete" onsubmit="return confirm('Delete this route?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <div class="empty-state">
-        <i class="ri-route-line"></i>
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v3c0 3.314 2.686 6 6 6h3"/></svg>
         <p>No routes created yet. Create your first shuttle route to get started.</p>
     </div>
     {% endif %}
 </div>
 
 <!-- Create Route Modal -->
-<div id="createRouteModal" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
+<div id="createRouteModal" class="overlay">
+    <div class="dialog">
+        <div class="dialog-head">
             <h3>Create New Route</h3>
-            <button class="modal-close" onclick="closeModal('createRouteModal')">&times;</button>
+            <button class="dialog-close" onclick="closeModal('createRouteModal')">&times;</button>
         </div>
         <form method="POST" action="/admin/routes/create">
-            <div class="modal-body">
+            <div class="dialog-body">
                 <div class="form-group">
-                    <label>Route Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="e.g. Hostel → College" required>
+                    <label class="form-label">Route Name</label>
+                    <input type="text" name="name" class="form-input" placeholder="e.g. Hostel → College" required>
                 </div>
                 <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" name="description" class="form-control" placeholder="Morning shuttle from...">
+                    <label class="form-label">Description</label>
+                    <input type="text" name="description" class="form-input" placeholder="Morning shuttle from...">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Price (₹)</label>
-                        <input type="number" name="price" class="form-control" value="20" step="5" min="0">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" name="price" class="form-input" value="20" step="5" min="0">
                     </div>
                     <div class="form-group">
-                        <label>Total Seats</label>
-                        <input type="number" name="total_seats" class="form-control" value="25" min="1">
+                        <label class="form-label">Total Seats</label>
+                        <input type="number" name="total_seats" class="form-input" value="25" min="1">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Estimated Duration (minutes)</label>
-                    <input type="number" name="estimated_duration_min" class="form-control" value="15" min="1">
+                    <label class="form-label">Estimated Duration (minutes)</label>
+                    <input type="number" name="estimated_duration_min" class="form-input" value="15" min="1">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" onclick="closeModal('createRouteModal')">Cancel</button>
+            <div class="dialog-foot">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createRouteModal')">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create Route</button>
             </div>
         </form>

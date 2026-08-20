@@ -3,7 +3,9 @@
 {% block page_title %}Users{% endblock %}
 
 {% block content %}
-<p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">{{ users|length }} user{{ 's' if users|length != 1 }}</p>
+<div class="toolbar">
+    <span class="toolbar-count">{{ users|length }} user{{ 's' if users|length != 1 }}</span>
+</div>
 
 <div class="card">
     {% if users %}
@@ -24,31 +26,29 @@
             <tr>
                 <td>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;">
-                            {{ user.name[0]|upper if user.name else '?' }}
-                        </div>
-                        <span style="color:var(--text-primary); font-weight:500;">{{ user.name }}</span>
+                        <div class="avatar">{{ user.name[0]|upper if user.name else '?' }}</div>
+                        <span class="cell-main">{{ user.name }}</span>
                     </div>
                 </td>
                 <td>{{ user.phone or '—' }}</td>
                 <td>{{ user.email or '—' }}</td>
-                <td>
-                    <span style="color:var(--warning);">★</span> {{ "%.1f"|format(user.rating) }}
-                </td>
-                <td style="font-weight:600;">₹{{ "%.0f"|format(user.wallet_balance) }}</td>
+                <td class="cell-main">★ {{ "%.1f"|format(user.rating) }}</td>
+                <td class="cell-main">₹{{ "%.0f"|format(user.wallet_balance) }}</td>
                 <td>{{ user.created_at.strftime('%d %b %Y') }}</td>
                 <td>
-                    <span class="status {{ 'status-active' if user.is_active else 'status-inactive' }}">
-                        {{ 'Active' if user.is_active else 'Disabled' }}
-                    </span>
+                    {% if user.is_active %}
+                    <span class="badge badge-green">Active</span>
+                    {% else %}
+                    <span class="badge badge-red">Disabled</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <div class="empty-state">
-        <i class="ri-user-3-line"></i>
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <p>No users registered yet. Users will appear here after they sign up via the app.</p>
     </div>
     {% endif %}

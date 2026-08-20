@@ -3,7 +3,9 @@
 {% block page_title %}Bookings{% endblock %}
 
 {% block content %}
-<p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">{{ bookings|length }} booking{{ 's' if bookings|length != 1 }}</p>
+<div class="toolbar">
+    <span class="toolbar-count">{{ bookings|length }} booking{{ 's' if bookings|length != 1 }}</span>
+</div>
 
 <div class="card">
     {% if bookings %}
@@ -23,29 +25,37 @@
         <tbody>
             {% for b in bookings %}
             <tr>
-                <td style="color:var(--text-primary); font-weight:500;">
-                    {{ b.user.name if b.user else 'Unknown' }}
-                </td>
+                <td class="cell-main">{{ b.user.name if b.user else 'Unknown' }}</td>
                 <td>{{ b.trip.route.name if b.trip and b.trip.route else '—' }}</td>
                 <td>
-                    <span class="status status-{{ 'active' if b.booking_type == 'SHUTTLE' else 'started' }}">
-                        {{ b.booking_type }}
-                    </span>
+                    {% if b.booking_type == 'SHUTTLE' %}
+                    <span class="badge badge-blue">{{ b.booking_type }}</span>
+                    {% else %}
+                    <span class="badge badge-gray">{{ b.booking_type }}</span>
+                    {% endif %}
                 </td>
-                <td style="font-size:12px;">
-                    {{ b.boarding_stop_name or '—' }} → {{ b.alighting_stop_name or '—' }}
-                </td>
+                <td style="font-size:12px;">{{ b.boarding_stop_name or '—' }} → {{ b.alighting_stop_name or '—' }}</td>
                 <td>₹{{ "%.0f"|format(b.fare) }}</td>
-                <td style="font-weight:600;">₹{{ "%.0f"|format(b.total_paid) }}</td>
-                <td><span class="status status-{{ b.status|lower }}">{{ b.status }}</span></td>
+                <td class="cell-main">₹{{ "%.0f"|format(b.total_paid) }}</td>
+                <td>
+                    {% if b.status|lower in ['confirmed', 'completed'] %}
+                    <span class="badge badge-green">{{ b.status }}</span>
+                    {% elif b.status|lower in ['cancelled'] %}
+                    <span class="badge badge-red">{{ b.status }}</span>
+                    {% elif b.status|lower in ['pending', 'scheduled'] %}
+                    <span class="badge badge-amber">{{ b.status }}</span>
+                    {% else %}
+                    <span class="badge badge-gray">{{ b.status }}</span>
+                    {% endif %}
+                </td>
                 <td>{{ b.created_at.strftime('%d %b, %I:%M %p') }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <div class="empty-state">
-        <i class="ri-ticket-2-line"></i>
+    <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
         <p>No bookings yet.</p>
     </div>
     {% endif %}
