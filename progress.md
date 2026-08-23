@@ -36,15 +36,28 @@ This document tracks past achievements, daily progress, and future goals to prev
   - Updated `context.md` and `progress.md` to reflect new architecture.
 - **Current State**: Backend tracking API (`POST /tracking/update`, `GET /tracking/trip/{trip_id}`) is complete. Driver app has native background geolocation configured. User app has live tracking screen ready. Supabase Realtime needs cloud project setup.
 - **Next Immediate Goal**: Set up Supabase cloud project, configure API keys, and test end-to-end tracking flow.
+---
 
-## 🎯 Future Goals (Current Phase 1 Focus)
-1. **Real-time Tracking Architecture**: 
-   - Integrate `flutter_background_geolocation` in `dropat_driver` to batch-push GPS coordinates to FastAPI (SQLite queueing).
-   - Configure FastAPI to write batch points to PostgreSQL.
-   - Setup Supabase Realtime to broadcast DB `UPDATE` events to `dropat_user`.
-2. **Map UI Migration**: Transition from Google Maps to Mapbox GL in both Flutter apps for smoother asset rendering.
-3. **State Management Migration**: Refactor Flutter apps to use Riverpod for efficient async data stream handling.
-4. **Payment Gateway**: Integrate Razorpay / Cashfree test SDK in the User app for seat booking via UPI.
+## 🎯 Phase 1 Status
+
+| Feature | Status |
+|---|---|
+| Backend Core (FastAPI + SQLModel) | ✅ Done |
+| Admin Panel (Jinja2 minimalist UI) | ✅ Done |
+| Mobile UI (User + Driver Flutter) | ✅ Done |
+| Payment Gateway (Razorpay backend + Flutter) | ✅ Done |
+| Real-time Tracking (Background GPS → FastAPI → Supabase) | ✅ Code done, needs Supabase cloud setup |
+| Mapbox GL (LiveTrackingScreen) | ✅ Done (new screens only) |
+| Riverpod State Management | ✅ Done (tracking providers) |
+| Google Maps → Mapbox Migration (all screens) | 🔄 Incremental (8 legacy screens remain) |
+
+## ⚠️ Pending Actions
+- [ ] **Merge `feature/aditya` → `main`**: All new code is on the feature branch. Create a PR or merge when ready.
+- [ ] **Supabase Cloud Setup**: Create project at supabase.com, get URL + anon key, update `.env`.
+- [ ] **Mapbox Token**: Sign up at mapbox.com, add public token to Flutter apps.
+- [ ] **Razorpay Test Keys**: Get test keys from razorpay.com dashboard, update `.env`.
+- [ ] **Firebase Config Files**: Place `google-services.json` and `GoogleService-Info.plist`.
+- [ ] **Full Mapbox Migration**: Migrate remaining 8 screens from Google Maps to Mapbox GL.
 
 ## 🚀 Phase 2 (Future Expansion)
 - Point-to-Point routing (Uber/Rapido style).
