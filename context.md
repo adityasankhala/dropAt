@@ -16,19 +16,22 @@ The DropAt platform consists of three main components: a centralized backend and
 
 - **User App (`/dropat_user`)**: 
   - Framework: Flutter (Dart) for iOS & Android.
-  - Features: Booking shuttles, real-time tracking, wallet management, and viewing ride history.
+  - State Management: Riverpod (for async data streams without UI bottlenecks).
+  - Map UI: Mapbox GL (for smooth asset movement).
+  - Features: Booking shuttles, live tracking, wallet management.
 
 - **Driver App (`/dropat_driver`)**: 
   - Framework: Flutter (Dart) for iOS & Android.
-  - Features: Managing assigned trips, navigation, passenger check-ins, and earnings dashboard.
+  - State Management: Riverpod.
+  - Features: Background geolocation (batch pushing to FastAPI), managing trips, passenger manifests.
 
 ---
 
 ## 🔗 Integrations & External Services
-- **Authentication**: Firebase Auth (Mobile apps generate JWT tokens, Backend verifies them via Firebase Admin SDK).
-- **Payments**: Razorpay Gateway (Planned for wallet top-ups and ride payments).
-- **Maps & Routing**: Google Maps SDK / API (For drawing routes and tracking).
-- **Real-Time Data**: Supabase / WebSockets (Planned for live vehicle tracking).
+- **Authentication**: Firebase Auth (Phone/OTP verification).
+- **Payments**: Razorpay / Cashfree SDKs integrated natively into Flutter.
+- **Maps & Routing**: Mapbox GL.
+- **Real-Time Data**: Supabase Realtime (FastAPI writes batch GPS points to DB, Supabase automatically broadcasts `UPDATE` events to passengers).
 
 ---
 

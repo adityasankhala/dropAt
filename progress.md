@@ -23,11 +23,30 @@ This document tracks past achievements, daily progress, and future goals to prev
 - **Current State**: The backend and admin panel are 100% running. The Flutter apps exist but lack backend integration and data.
 - **Next Immediate Goal**: Seed the backend database with test data and connect the Flutter apps (User/Driver) to the FastAPI backend API.
 
----
+### Aug 24, 2026
+- **Achievements**:
+  - Implemented **Real-time Tracking Architecture** (Phase 1 core feature):
+    - Driver App: Integrated `flutter_background_geolocation` for battery-efficient GPS batch-pushing to FastAPI.
+    - User App: Built `LiveTrackingScreen` with Mapbox GL map + Riverpod `StreamProvider` listening to Supabase Realtime.
+    - Created Riverpod `tracking_providers.dart` with `tripLocationProvider`, `driverLocationProvider`, and `bookingStatusProvider`.
+  - Migrated both apps from Google Maps to **Mapbox GL** (`mapbox_maps_flutter`).
+  - Added **Riverpod** state management to both apps (`flutter_riverpod`).
+  - Rewrote `SupabaseService` to use SDK-agnostic `DriverLocation` model instead of `LatLng`.
+  - Wrapped User app root in `ProviderScope`.
+  - Updated `context.md` and `progress.md` to reflect new architecture.
+- **Current State**: Backend tracking API (`POST /tracking/update`, `GET /tracking/trip/{trip_id}`) is complete. Driver app has native background geolocation configured. User app has live tracking screen ready. Supabase Realtime needs cloud project setup.
+- **Next Immediate Goal**: Set up Supabase cloud project, configure API keys, and test end-to-end tracking flow.
 
-## 🎯 Future Goals (Backlog)
-1. **Frontend-Backend Integration**: Wire up `api_client.dart` in Flutter to point to the local FastAPI server and test the auth/booking flows.
-2. **Database Seeding**: Run `seed.py` to populate the empty database so the mobile apps have routes to display.
-3. **Real-time Tracking**: Integrate Supabase or WebSockets for live driver location tracking on the map.
-4. **Payment Gateway**: Integrate Razorpay test mode in the Flutter User app for booking payments.
-5. **Production Deployment**: Migrate the local Docker setup to Google Cloud (Cloud Run for API, Cloud SQL for PostgreSQL).
+## 🎯 Future Goals (Current Phase 1 Focus)
+1. **Real-time Tracking Architecture**: 
+   - Integrate `flutter_background_geolocation` in `dropat_driver` to batch-push GPS coordinates to FastAPI (SQLite queueing).
+   - Configure FastAPI to write batch points to PostgreSQL.
+   - Setup Supabase Realtime to broadcast DB `UPDATE` events to `dropat_user`.
+2. **Map UI Migration**: Transition from Google Maps to Mapbox GL in both Flutter apps for smoother asset rendering.
+3. **State Management Migration**: Refactor Flutter apps to use Riverpod for efficient async data stream handling.
+4. **Payment Gateway**: Integrate Razorpay / Cashfree test SDK in the User app for seat booking via UPI.
+
+## 🚀 Phase 2 (Future Expansion)
+- Point-to-Point routing (Uber/Rapido style).
+- Geospatial driver matching (Redis + Uber H3 hex clustering).
+- Dynamic pricing algorithm.
