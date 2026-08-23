@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/driver_theme.dart';
+import '../services/location_service.dart';
 
 class DriverRideScreen extends StatefulWidget {
   final String rideId;
@@ -24,6 +25,7 @@ class DriverRideScreen extends StatefulWidget {
 
 class _DriverRideScreenState extends State<DriverRideScreen> {
   final _firestore = FirebaseFirestore.instance;
+  final _locationService = LocationService();
   String _status = 'ACCEPTED';
 
   String get _statusLabel {
@@ -63,7 +65,14 @@ class _DriverRideScreenState extends State<DriverRideScreen> {
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
+    // Start background GPS tracking when ride begins
+    if (next == 'STARTED') {
+      await _locationService.startTracking(widget.rideId);
+    }
+
+    // Stop tracking when ride is completed
     if (next == 'COMPLETED') {
+      await _locationService.stopTracking();
       if (mounted) Navigator.pop(context);
       return;
     }
