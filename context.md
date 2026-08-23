@@ -39,3 +39,16 @@ The DropAt platform consists of three main components: a centralized backend and
 - `dropat_backend/`: FastAPI source code, Docker configuration, Admin HTML templates.
 - `dropat_user/`: Flutter source code for the student application.
 - `dropat_driver/`: Flutter source code for the driver application.
+
+---
+
+## 🗺️ Real-World Route Context
+- **Campus Location**: Bagru, Rajasthan (~25km west of Jaipur city center).
+- **Route A (City Express)**: Bagru → Airport → Malviya Nagar → WTP → C-Scheme (south-east corridor, ~55 min).
+- **Route B (Station Express)**: Bagru → Chandpole → Sindhi Camp → Railway Station (north corridor, ~45 min).
+- **Logic**: 2 shuttles depart simultaneously. Route A covers the south destinations, Route B covers the old city transport hubs. No overlap, maximum coverage.
+
+## ⚙️ UI Rules
+- **DO NOT change** existing UI colors, themes, or design combinations.
+- All new screens must use the existing `DropAtColors`, `DropAtTextStyles`, and `DropAtRadius` tokens from `app_theme.dart`.
+

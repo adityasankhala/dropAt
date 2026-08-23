@@ -15,58 +15,42 @@ class _ShuttleScreenState extends State<ShuttleScreen> {
   List<ShuttleRouteModel> _routes = [];
   bool _loading = true;
 
-  // Demo routes for UI preview
+  // Real Bagru → Jaipur routes (fallback when API is offline)
   final List<ShuttleRouteModel> _demoRoutes = [
     ShuttleRouteModel(
-      routeId: 'demo1',
-      name: 'Hostel → College',
+      routeId: 'city-express',
+      name: 'City Express',
       stops: [
-        ShuttleStop(name: 'Boys Hostel', lat: 26.8467, lng: 75.5610, order: 1),
-        ShuttleStop(name: 'Girls Hostel', lat: 26.8480, lng: 75.5625, order: 2),
-        ShuttleStop(name: 'Main Gate', lat: 26.8500, lng: 75.5650, order: 3),
-        ShuttleStop(name: 'Academic Block', lat: 26.8520, lng: 75.5670, order: 4),
+        ShuttleStop(name: 'College Campus (Bagru)', lat: 26.8156, lng: 75.5422, order: 1),
+        ShuttleStop(name: 'Jaipur Airport', lat: 26.8242, lng: 75.8122, order: 2),
+        ShuttleStop(name: 'Malviya Nagar', lat: 26.8530, lng: 75.8025, order: 3),
+        ShuttleStop(name: 'WTP (World Trade Park)', lat: 26.8927, lng: 75.8050, order: 4),
+        ShuttleStop(name: 'C-Scheme', lat: 26.9040, lng: 75.7930, order: 5),
       ],
       schedule: [
-        ShuttleSchedule(departureTime: '07:30 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
-        ShuttleSchedule(departureTime: '08:00 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
-        ShuttleSchedule(departureTime: '08:30 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+        ShuttleSchedule(departureTime: '07:00 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
+        ShuttleSchedule(departureTime: '05:00 PM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
       ],
-      price: 20,
-      totalSeats: 25,
-      availableSeats: 18,
+      price: 60,
+      totalSeats: 30,
+      availableSeats: 22,
     ),
     ShuttleRouteModel(
-      routeId: 'demo2',
-      name: 'College → Market',
+      routeId: 'station-express',
+      name: 'Station Express',
       stops: [
-        ShuttleStop(name: 'Academic Block', lat: 26.8520, lng: 75.5670, order: 1),
-        ShuttleStop(name: 'Main Gate', lat: 26.8500, lng: 75.5650, order: 2),
-        ShuttleStop(name: 'GT Mall', lat: 26.8560, lng: 75.5700, order: 3),
-        ShuttleStop(name: 'City Market', lat: 26.8600, lng: 75.5730, order: 4),
+        ShuttleStop(name: 'College Campus (Bagru)', lat: 26.8156, lng: 75.5422, order: 1),
+        ShuttleStop(name: 'Chandpole', lat: 26.9218, lng: 75.7770, order: 2),
+        ShuttleStop(name: 'Sindhi Camp Bus Stand', lat: 26.9270, lng: 75.7870, order: 3),
+        ShuttleStop(name: 'Jaipur Railway Station', lat: 26.9196, lng: 75.7878, order: 4),
       ],
       schedule: [
-        ShuttleSchedule(departureTime: '04:00 PM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
-        ShuttleSchedule(departureTime: '06:00 PM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
-      ],
-      price: 30,
-      totalSeats: 25,
-      availableSeats: 12,
-    ),
-    ShuttleRouteModel(
-      routeId: 'demo3',
-      name: 'College → Railway Station',
-      stops: [
-        ShuttleStop(name: 'Academic Block', lat: 26.8520, lng: 75.5670, order: 1),
-        ShuttleStop(name: 'Bus Stand', lat: 26.8700, lng: 75.5800, order: 2),
-        ShuttleStop(name: 'Railway Station', lat: 26.9200, lng: 75.7900, order: 3),
-      ],
-      schedule: [
-        ShuttleSchedule(departureTime: '03:00 PM', daysOfWeek: ['Fri', 'Sat']),
-        ShuttleSchedule(departureTime: '05:00 PM', daysOfWeek: ['Fri', 'Sat']),
+        ShuttleSchedule(departureTime: '07:00 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
+        ShuttleSchedule(departureTime: '05:30 PM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']),
       ],
       price: 50,
-      totalSeats: 25,
-      availableSeats: 5,
+      totalSeats: 30,
+      availableSeats: 18,
     ),
   ];
 
