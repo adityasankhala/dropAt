@@ -16,26 +16,25 @@ class ShuttleService {
         
         final waypoints = route['waypoints'] as List;
         final stops = waypoints.map((w) => ShuttleStop(
-          id: w['id'],
           name: w['name'],
-          location: LatLng(w['lat'], w['lng']),
-          estimatedArrivalOffset: w['estimated_arrival_offset_min'] ?? 0,
+          lat: w['lat'],
+          lng: w['lng'],
+          order: 0,
         )).toList();
         
         final schedules = route['schedule'] as List? ?? [];
         final schedulesList = schedules.map((s) => ShuttleSchedule(
           departureTime: s['departure_time'],
-          days: List<String>.from(s['days']),
+          daysOfWeek: List<String>.from(s['days']),
         )).toList();
 
         return ShuttleRouteModel(
-          id: route['id'],
+          routeId: route['id'],
           name: route['name'],
           price: (route['price'] as num).toDouble(),
           totalSeats: route['total_seats'],
           stops: stops,
-          schedules: schedulesList,
-          isActive: route['is_active'],
+          schedule: schedulesList,
         );
       }).toList();
     } catch (e) {
@@ -48,20 +47,19 @@ class ShuttleService {
   static List<ShuttleRouteModel> _getDemoRoutes() {
     return [
       ShuttleRouteModel(
-        id: 'r1',
+        routeId: 'r1',
         name: 'Hostel → College',
         price: 20,
         totalSeats: 25,
-        isActive: true,
-        schedules: [
-          ShuttleSchedule(departureTime: '08:00 AM', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
-          ShuttleSchedule(departureTime: '08:30 AM', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+        schedule: [
+          ShuttleSchedule(departureTime: '08:00 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+          ShuttleSchedule(departureTime: '08:30 AM', daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
         ],
         stops: [
-          ShuttleStop(id: 's1', name: 'Boys Hostel B1', location: const LatLng(26.8436, 75.5652), estimatedArrivalOffset: 0),
-          ShuttleStop(id: 's2', name: 'Girls Hostel G1', location: const LatLng(26.8441, 75.5661), estimatedArrivalOffset: 5),
-          ShuttleStop(id: 's3', name: 'Main Gate', location: const LatLng(26.8450, 75.5670), estimatedArrivalOffset: 10),
-          ShuttleStop(id: 's4', name: 'Academic Block 1', location: const LatLng(26.8465, 75.5685), estimatedArrivalOffset: 15),
+          ShuttleStop(name: 'Boys Hostel B1', lat: 26.8436, lng: 75.5652, order: 1),
+          ShuttleStop(name: 'Girls Hostel G1', lat: 26.8441, lng: 75.5661, order: 2),
+          ShuttleStop(name: 'Main Gate', lat: 26.8450, lng: 75.5670, order: 3),
+          ShuttleStop(name: 'Academic Block 1', lat: 26.8465, lng: 75.5685, order: 4),
         ],
       ),
     ];
@@ -69,17 +67,19 @@ class ShuttleService {
 
   /// Book a seat using FastAPI
   static Future<String> bookSeat({
-    required String tripId,
-    required String boardingStopName,
-    required String alightingStopName,
+    required String userId,
+    required String routeId,
+    required String boardingStop,
+    required String alightingStop,
     required String scheduleTime,
     String paymentMethod = 'CASH',
     String? voucherCode,
   }) async {
     final response = await _api.post('/bookings/shuttle', body: {
-      'trip_id': tripId,
-      'boarding_stop_name': boardingStopName,
-      'alighting_stop_name': alightingStopName,
+      'user_id': userId,
+      'trip_id': routeId,
+      'boarding_stop_name': boardingStop,
+      'alighting_stop_name': alightingStop,
       'schedule_time': scheduleTime,
       'payment_method': paymentMethod,
       'voucher_code': voucherCode,

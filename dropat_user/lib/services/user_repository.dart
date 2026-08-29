@@ -24,7 +24,9 @@ class UserRepository {
   }
 
   /// Get profile from FastAPI
-  static Future<UserProfileModel?> getProfile(String uid) async {
+  static Future<UserProfileModel?> getProfile([String? uid]) async {
+    uid ??= FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
     try {
       final data = await _api.get('/users/me');
       return UserProfileModel(
@@ -35,7 +37,7 @@ class UserRepository {
         photoUrl: data['photo_url'],
         rating: (data['rating'] as num).toDouble(),
         walletBalance: (data['wallet_balance'] as num).toDouble(),
-        joinedAt: DateTime.parse(data['created_at']),
+        createdAt: DateTime.parse(data['created_at']),
         savedPlaces: [],
       );
     } catch (e) {

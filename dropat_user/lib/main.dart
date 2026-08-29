@@ -11,7 +11,12 @@ import 'screens/main_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
   await SupabaseService.initialize();
 
   runApp(const DropAtApp());
@@ -58,22 +63,7 @@ class _RootAppState extends State<RootApp> {
       return const SplashScreen();
     }
 
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        // ⏳ Firebase still initializing
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SplashScreen();
-        }
-
-        // ✅ USER LOGGED IN → MainShell
-        if (snapshot.hasData) {
-          return const MainShell();
-        }
-
-        // ❌ USER NOT LOGGED IN → Login
-        return const LoginOptionsScreen();
-      },
-    );
+    // ❌ USER NOT LOGGED IN → Login (Bypassing Firebase to show UI)
+    return const LoginOptionsScreen();
   }
 }
