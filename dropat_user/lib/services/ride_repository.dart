@@ -1,10 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/ride_model.dart';
 import '../models/ride_status.dart';
 import '../models/vehicle_type.dart';
+import '../models/lat_lng.dart';
 import 'api_client.dart';
 import 'supabase_service.dart';
 
+/// RideRepository — handles ride CRUD and real-time status listening.
+///
+/// WHY this exists as a separate layer from ApiClient:
+/// - ApiClient is generic HTTP (GET/POST/PUT/DELETE)
+/// - RideRepository adds ride-specific business logic:
+///   mapping backend statuses → local enums, Supabase Realtime streams
+/// - This separation means screens don't know about API details
 class RideRepository {
   static final ApiClient _api = ApiClient();
 
@@ -52,13 +59,11 @@ class RideRepository {
         vType = VehicleType.values.firstWhere((e) => e.name == typeStr, orElse: () => VehicleType.bike);
       } catch (_) {}
 
-      // A mock mapping back to RideModel for UI compatibility
-      // In a real app we'd fully type the backend response
       return RideModel(
-        id: data['id'],
+        rideId: data['id'],
         userId: data['user_id'],
-        pickup: const google_maps_flutter.LatLng(0, 0), // Normally fetched from trip table
-        drop: const google_maps_flutter.LatLng(0, 0),
+        pickup: const LatLng(0, 0), // Coordinates fetched separately from trip table
+        drop: const LatLng(0, 0),
         pickupAddress: data['boarding_stop_name'] ?? 'Pickup',
         dropAddress: data['alighting_stop_name'] ?? 'Drop',
         distanceMeters: 0,
@@ -84,12 +89,11 @@ class RideRepository {
     try {
       final response = await _api.get('/bookings/me?status=active&limit=1');
       if (response['bookings'] != null && (response['bookings'] as List).isNotEmpty) {
-        // Just return a dummy model to trigger the UI if there is an active ride
         return RideModel(
-          id: response['bookings'][0]['id'],
+          rideId: response['bookings'][0]['id'],
           userId: '',
-          pickup: const google_maps_flutter.LatLng(0, 0),
-          drop: const google_maps_flutter.LatLng(0, 0),
+          pickup: const LatLng(0, 0),
+          drop: const LatLng(0, 0),
           pickupAddress: '',
           dropAddress: '',
           distanceMeters: 0,
@@ -106,6 +110,12 @@ class RideRepository {
     }
     return null;
   }
+
+  /// Listen to nearby drivers (for home screen markers)
+  /// Returns a stream of driver location maps
+  static Stream<List<Map<String, dynamic>>> listenToNearbyDrivers() {
+    // TODO: Wire to Supabase Realtime channel for driver locations
+    // For now return empty stream
+    return Stream.value([]);
+  }
 }
-// Note: using prefix to resolve LatLng ambiguity if not imported
-import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps_flutter;

@@ -1,8 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'lat_lng.dart';
 import 'ride_status.dart';
 import 'vehicle_type.dart';
 
+/// RideModel — represents a point-to-point ride booking.
+///
+/// WHY we use our own LatLng instead of google_maps_flutter.LatLng:
+/// Models should be SDK-agnostic. The UI layer converts to whatever
+/// the active map SDK needs. This also lets us swap map providers
+/// (Google → Mapbox) without touching business logic.
 class RideModel {
   final String? rideId;
   final String? userId;
@@ -77,10 +82,8 @@ class RideModel {
       'feedback': feedback,
       'tipAmount': tipAmount,
       'encodedPolyline': encodedPolyline,
-      'createdAt': createdAt != null
-          ? Timestamp.fromDate(createdAt!)
-          : FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -115,8 +118,12 @@ class RideModel {
       feedback: map['feedback'],
       tipAmount: map['tipAmount']?.toDouble(),
       encodedPolyline: map['encodedPolyline'],
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
-      updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
+      createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt'].toString())
+          : null,
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.tryParse(map['updatedAt'].toString())
+          : null,
     );
   }
 

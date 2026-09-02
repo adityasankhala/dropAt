@@ -40,16 +40,15 @@ This document tracks past achievements, daily progress, and future goals to prev
 
 ## 🎯 Phase 1 Status
 
-| Feature | Status |
-|---|---|
-| Backend Core (FastAPI + SQLModel) | ✅ Done |
-| Admin Panel (Jinja2 minimalist UI) | ✅ Done |
-| Mobile UI (User + Driver Flutter) | ✅ Done |
-| Payment Gateway (Razorpay backend + Flutter) | ✅ Done |
-| Real-time Tracking (Background GPS → FastAPI → Supabase) | ✅ Code done, needs Supabase cloud setup |
-| Mapbox GL (LiveTrackingScreen) | ✅ Done (new screens only) |
-| Riverpod State Management | ✅ Done (tracking providers) |
-| Google Maps → Mapbox Migration (all screens) | 🔄 Incremental (8 legacy screens remain) |
+| Task | Component | Status | Notes |
+|------|-----------|--------|-------|
+| Setup Supabase (Cloud) | Backend | ❌ Blocked | Needs user to create Supabase project and provide `DATABASE_URL` & Anon Key |
+| Mapbox Token | Frontend | ❌ Blocked | Needs Mapbox Public Token |
+| Razorpay Keys | Backend/Frontend | ❌ Blocked | Needs Razorpay Test Keys |
+| Display Real Drop Points on Map | Frontend | ✅ Done | Added Bagru-Jaipur drop points to `HomeScreen` map for Phase 1. |
+| Migrate Legacy Screens to Mapbox GL | Frontend | 🔄 Pending | Needs Mapbox Token first |
+| Alembic Migrations | Backend | ❌ Blocked | Awaiting valid `DATABASE_URL` to generate initial schema |
+| Production Deployment | DevOps | 🔄 Pending | Waiting on DB and API completion |
 
 ## ⚠️ Pending Actions
 - [ ] **Merge `feature/aditya` → `main`**: All new code is on the feature branch. Create a PR or merge when ready.

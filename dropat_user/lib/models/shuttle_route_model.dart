@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ShuttleRouteModel — no SDK dependencies, pure Dart data class.
 
 class ShuttleStop {
   final String name;
