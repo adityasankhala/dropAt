@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/ride_model.dart';
 import '../models/ride_status.dart';
 import '../models/vehicle_type.dart';
-import '../models/lat_lng.dart';
 import 'api_client.dart';
 import 'supabase_service.dart';
 

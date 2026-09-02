@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import '../models/lat_lng.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'places_service.dart';
 
 class DirectionsResult {
@@ -58,10 +58,9 @@ class DirectionsService {
       final leg = route['legs'][0];
 
       // Decode polyline
-      final polylinePointsDecoder = PolylinePoints();
       final encodedPolyline = route['overview_polyline']['points'];
       final decodedPoints =
-          polylinePointsDecoder.decodePolyline(encodedPolyline);
+          PolylinePoints.decodePolyline(encodedPolyline);
 
       final points = decodedPoints
           .map((p) => LatLng(p.latitude, p.longitude))

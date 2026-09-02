@@ -1,4 +1,4 @@
-import 'lat_lng.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'ride_status.dart';
 import 'vehicle_type.dart';
 
