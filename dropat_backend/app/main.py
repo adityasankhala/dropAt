@@ -71,7 +71,7 @@ async def seed_database():
     async with async_session_factory() as session:
         # Check if already seeded
         from sqlmodel import select
-        existing = (await session.exec(select(Route))).all()
+        existing = (await session.execute(select(Route))).all()
         if existing:
             return {"status": "already_seeded", "routes": len(existing)}
 
