@@ -28,6 +28,16 @@ class Settings(BaseSettings):
     # ── Database ─────────────────────────────────
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/dropat"
 
+    from pydantic import field_validator
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+asyncpg://", 1)
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
+
     # ── Supabase ─────────────────────────────────
     SUPABASE_URL: str = ""
     SUPABASE_ANON_KEY: str = ""
