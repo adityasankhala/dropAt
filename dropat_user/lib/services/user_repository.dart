@@ -35,7 +35,7 @@ class UserRepository {
         photoUrl: data['photo_url'],
         rating: (data['rating'] as num).toDouble(),
         walletBalance: (data['wallet_balance'] as num).toDouble(),
-        joinedAt: DateTime.parse(data['created_at']),
+        createdAt: DateTime.parse(data['created_at']),
         savedPlaces: [],
       );
     } catch (e) {

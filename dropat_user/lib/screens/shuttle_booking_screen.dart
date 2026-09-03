@@ -305,10 +305,9 @@ class _ShuttleBookingScreenState extends State<ShuttleBookingScreen> {
       if (user == null) return;
 
       await ShuttleService.bookSeat(
-        userId: user.uid,
-        routeId: widget.route.routeId,
-        boardingStop: widget.route.stops[_boardingIndex!].name,
-        alightingStop: widget.route.stops[_alightingIndex!].name,
+        tripId: widget.route.routeId,
+        boardingStopName: widget.route.stops[_boardingIndex!].name,
+        alightingStopName: widget.route.stops[_alightingIndex!].name,
         scheduleTime:
             widget.route.schedule[_selectedScheduleIndex].departureTime,
       );

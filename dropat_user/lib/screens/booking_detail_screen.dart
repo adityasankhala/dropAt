@@ -44,8 +44,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   List<LatLng> _decodePolyline(String encoded) {
     if (encoded.isEmpty) return [widget.pickup, widget.drop];
-    final polylinePoints = PolylinePoints();
-    final decoded = polylinePoints.decodePolyline(encoded);
+    final decoded = PolylinePoints.decodePolyline(encoded);
     return decoded.map((p) => LatLng(p.latitude, p.longitude)).toList();
   }
 

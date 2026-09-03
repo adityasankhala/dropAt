@@ -112,11 +112,64 @@ class RideRepository {
     return null;
   }
 
+  /// Get user ride history from API
+  static Future<List<RideModel>> getUserRideHistory() async {
+    try {
+      final response = await _api.get('/bookings/me?limit=50');
+      final bookings = response['bookings'] as List? ?? [];
+      return bookings.map<RideModel>((b) {
+        VehicleType vType = VehicleType.bike;
+        try {
+          final typeStr = (b['vehicle_type'] ?? 'bike').toString().toLowerCase();
+          vType = VehicleType.values.firstWhere((e) => e.name == typeStr, orElse: () => VehicleType.bike);
+        } catch (_) {}
+
+        RideStatus status = RideStatus.requested;
+        switch (b['status']) {
+          case 'completed': status = RideStatus.completed; break;
+          case 'cancelled': status = RideStatus.cancelled; break;
+          case 'started': status = RideStatus.started; break;
+          default: status = RideStatus.requested;
+        }
+
+        return RideModel(
+          rideId: b['id'],
+          userId: b['user_id'] ?? '',
+          pickup: const LatLng(0, 0),
+          drop: const LatLng(0, 0),
+          pickupAddress: b['boarding_stop_name'] ?? 'Pickup',
+          dropAddress: b['alighting_stop_name'] ?? 'Drop',
+          distanceMeters: 0,
+          durationSeconds: 0,
+          vehicleType: vType,
+          fare: ((b['fare'] ?? 0) as num).toDouble(),
+          totalPaid: ((b['total_paid'] ?? 0) as num).toDouble(),
+          paymentMethod: b['payment_method'] ?? 'CASH',
+          status: status,
+        );
+      }).toList();
+    } catch (e) {
+      print('Error getting ride history: $e');
+      return [];
+    }
+  }
+
+  /// Rate a ride via API
+  static Future<void> rateRide({
+    required String rideId,
+    required double rating,
+    String? feedback,
+    double? tipAmount,
+  }) async {
+    await _api.post('/bookings/$rideId/rate', body: {
+      'rating': rating.toInt(),
+      if (feedback != null) 'feedback': feedback,
+      if (tipAmount != null) 'tip_amount': tipAmount,
+    });
+  }
+
   /// Listen to nearby drivers (for home screen markers)
-  /// Returns a stream of driver location maps
   static Stream<List<Map<String, dynamic>>> listenToNearbyDrivers() {
-    // TODO: Wire to Supabase Realtime channel for driver locations
-    // For now return empty stream
     return Stream.value([]);
   }
 }
