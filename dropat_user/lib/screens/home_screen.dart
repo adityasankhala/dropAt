@@ -701,6 +701,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     }
 
+    // Phase 1 Real Use Case: Fixed Drop Points for Shuttle Routes
+    final dropPoints = {
+      'College (Bagru)': const LatLng(26.8156, 75.5422),
+      'Chandpole': const LatLng(26.9218, 75.7770),
+      'Sindhi Camp': const LatLng(26.9270, 75.7870),
+      'Railway Station': const LatLng(26.9196, 75.7878),
+      'Jaipur Airport': const LatLng(26.8242, 75.8122),
+      'Malviya Nagar': const LatLng(26.8530, 75.8025),
+      'WTP': const LatLng(26.8927, 75.8050),
+      'C-Scheme': const LatLng(26.9040, 75.7930),
+    };
+
+    for (final point in dropPoints.entries) {
+      markers.add(Marker(
+        markerId: MarkerId('stop_${point.key}'),
+        position: point.value,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+        infoWindow: InfoWindow(title: '${point.key} Drop Point', snippet: 'Shuttle Stop'),
+      ));
+    }
+
     return markers;
   }
 

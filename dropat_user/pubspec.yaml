@@ -21,11 +21,13 @@ dependencies:
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.0
 
-  # Google Maps support
-  google_maps_flutter: ^2.9.0
+  # Mapbox support (new screens: LiveTrackingScreen)
+  flutter_riverpod: ^2.5.1
+  # Google Maps (legacy screens — will migrate to Mapbox incrementally)
+  google_maps_flutter: ^2.14.2
   geolocator: ^13.0.1
   geocoding: ^3.0.0
-  flutter_polyline_points: ^2.0.0
+  flutter_polyline_points: ^3.1.0
 
   # HTTP requests
   http: ^1.6.0

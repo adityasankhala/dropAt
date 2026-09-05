@@ -1,0 +1,8 @@
+dropat_user/
+dropat_driver/
+dropat_admin/
+.git/
+.idea/
+.vscode/
+**/build/
+**/.dart_tool/

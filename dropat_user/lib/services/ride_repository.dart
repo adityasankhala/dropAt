@@ -1,22 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps_flutter;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/ride_model.dart';
 import '../models/ride_status.dart';
 import '../models/vehicle_type.dart';
 import 'api_client.dart';
+import 'supabase_service.dart';
 
+/// RideRepository — handles ride CRUD and real-time status listening.
+///
+/// WHY this exists as a separate layer from ApiClient:
+/// - ApiClient is generic HTTP (GET/POST/PUT/DELETE)
+/// - RideRepository adds ride-specific business logic:
+///   mapping backend statuses → local enums, Supabase Realtime streams
+/// - This separation means screens don't know about API details
 class RideRepository {
   static final ApiClient _api = ApiClient();
-
-  /// Listen to nearby drivers
-  static Stream<dynamic> listenToNearbyDrivers() {
-    return const Stream.empty();
-  }
-
-  /// Get user ride history
-  static Future<List<RideModel>> getUserRideHistory() async {
-    return [];
-  }
 
   /// Create a ride booking via API
   static Future<String> createRide({required RideModel ride}) async {
@@ -36,8 +34,50 @@ class RideRepository {
 
   /// Listen to ride status updates via Supabase Realtime
   static Stream<RideModel> listenToRide(String rideId) {
-    // SupabaseService is not yet implemented
-    return const Stream.empty();
+    return SupabaseService.listenToBookingStatus(rideId).map((data) {
+      if (data.isEmpty) throw Exception('Ride not found');
+      
+      // Convert backend status to local enum
+      RideStatus status;
+      switch (data['status']) {
+        case 'pending':
+        case 'confirmed':
+        case 'requested': status = RideStatus.requested; break;
+        case 'searching': status = RideStatus.searching; break;
+        case 'accepted': status = RideStatus.accepted; break;
+        case 'driver_en_route': status = RideStatus.driverEnRoute; break;
+        case 'arrived': status = RideStatus.arrived; break;
+        case 'started': status = RideStatus.started; break;
+        case 'completed': status = RideStatus.completed; break;
+        case 'cancelled':
+        case 'refunded': status = RideStatus.cancelled; break;
+        default: status = RideStatus.requested;
+      }
+      
+      VehicleType vType = VehicleType.bike;
+      try {
+        final typeStr = (data['vehicle_type'] ?? 'bike').toString().toLowerCase();
+        vType = VehicleType.values.firstWhere((e) => e.name == typeStr, orElse: () => VehicleType.bike);
+      } catch (_) {}
+
+      return RideModel(
+        rideId: data['id'],
+        userId: data['user_id'],
+        pickup: const LatLng(0, 0), // Coordinates fetched separately from trip table
+        drop: const LatLng(0, 0),
+        pickupAddress: data['boarding_stop_name'] ?? 'Pickup',
+        dropAddress: data['alighting_stop_name'] ?? 'Drop',
+        distanceMeters: 0,
+        durationSeconds: 0,
+        vehicleType: vType,
+        fare: (data['fare'] as num).toDouble(),
+        discountAmount: (data['discount_amount'] as num).toDouble(),
+        totalPaid: (data['total_paid'] as num).toDouble(),
+        paymentMethod: data['payment_method'],
+        status: status,
+        driverId: data['driver_id'],
+      );
+    });
   }
 
   /// Cancel a ride via API
@@ -45,7 +85,7 @@ class RideRepository {
     await _api.delete('/bookings/$rideId?reason=${Uri.encodeComponent(reason)}');
   }
 
-  /// Rate a ride
+  /// Rate a ride via API
   static Future<void> rateRide({
     required String rideId,
     required double rating,
@@ -53,9 +93,9 @@ class RideRepository {
     double? tipAmount,
   }) async {
     await _api.post('/bookings/$rideId/rate', body: {
-      'rating': rating,
-      'feedback': feedback,
-      'tip_amount': tipAmount,
+      'rating': rating.toInt(),
+      if (feedback != null) 'feedback': feedback,
+      if (tipAmount != null) 'tip_amount': tipAmount,
     });
   }
 
@@ -64,12 +104,11 @@ class RideRepository {
     try {
       final response = await _api.get('/bookings/me?status=active&limit=1');
       if (response['bookings'] != null && (response['bookings'] as List).isNotEmpty) {
-        // Just return a dummy model to trigger the UI if there is an active ride
         return RideModel(
           rideId: response['bookings'][0]['id'],
           userId: '',
-          pickup: const google_maps_flutter.LatLng(0, 0),
-          drop: const google_maps_flutter.LatLng(0, 0),
+          pickup: const LatLng(0, 0),
+          drop: const LatLng(0, 0),
           pickupAddress: '',
           dropAddress: '',
           distanceMeters: 0,
@@ -85,5 +124,52 @@ class RideRepository {
       print('Error getting active ride: $e');
     }
     return null;
+  }
+
+  /// Get user ride history from API
+  static Future<List<RideModel>> getUserRideHistory() async {
+    try {
+      final response = await _api.get('/bookings/me?limit=50');
+      final bookings = response['bookings'] as List? ?? [];
+      return bookings.map<RideModel>((b) {
+        VehicleType vType = VehicleType.bike;
+        try {
+          final typeStr = (b['vehicle_type'] ?? 'bike').toString().toLowerCase();
+          vType = VehicleType.values.firstWhere((e) => e.name == typeStr, orElse: () => VehicleType.bike);
+        } catch (_) {}
+
+        RideStatus status = RideStatus.requested;
+        switch (b['status']) {
+          case 'completed': status = RideStatus.completed; break;
+          case 'cancelled': status = RideStatus.cancelled; break;
+          case 'started': status = RideStatus.started; break;
+          default: status = RideStatus.requested;
+        }
+
+        return RideModel(
+          rideId: b['id'],
+          userId: b['user_id'] ?? '',
+          pickup: const LatLng(0, 0),
+          drop: const LatLng(0, 0),
+          pickupAddress: b['boarding_stop_name'] ?? 'Pickup',
+          dropAddress: b['alighting_stop_name'] ?? 'Drop',
+          distanceMeters: 0,
+          durationSeconds: 0,
+          vehicleType: vType,
+          fare: ((b['fare'] ?? 0) as num).toDouble(),
+          totalPaid: ((b['total_paid'] ?? 0) as num).toDouble(),
+          paymentMethod: b['payment_method'] ?? 'CASH',
+          status: status,
+        );
+      }).toList();
+    } catch (e) {
+      print('Error getting ride history: $e');
+      return [];
+    }
+  }
+
+  /// Listen to nearby drivers (for home screen markers)
+  static Stream<List<Map<String, dynamic>>> listenToNearbyDrivers() {
+    return Stream.value([]);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'services/supabase_service.dart';
@@ -19,7 +20,9 @@ Future<void> main() async {
   }
   await SupabaseService.initialize();
 
-  runApp(const DropAtApp());
+  // ProviderScope is the root of all Riverpod providers.
+  // It must wrap the entire app so any screen can use ref.watch().
+  runApp(const ProviderScope(child: DropAtApp()));
 }
 
 class DropAtApp extends StatelessWidget {
