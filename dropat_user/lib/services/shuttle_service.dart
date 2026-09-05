@@ -10,7 +10,9 @@ import 'api_client.dart';
 class ShuttleService {
   static final ApiClient _api = ApiClient();
 
-  /// Fetch available routes from FastAPI backend
+  /// Fetch available routes from FastAPI backend.
+  /// Falls back to demo routes if the backend is unreachable,
+  /// so the app UI still works during development.
   static Future<List<ShuttleRouteModel>> getRoutes() async {
     try {
       final data = await _api.get('/routes');
@@ -43,8 +45,7 @@ class ShuttleService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching routes: $e');
-      // Fallback demo data when backend is offline
+      // Backend unreachable — return demo routes so the UI still renders
       return _getDemoRoutes();
     }
   }

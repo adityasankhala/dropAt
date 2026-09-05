@@ -33,40 +33,145 @@ The project is structured into three main repositories/folders:
 - **Framework**: [Flutter](https://flutter.dev/) (iOS & Android)
 - **Features**: Trip management, route navigation, passenger check-ins, earnings dashboard.
 
-## 🚀 Getting Started
+---
+
+## 🚀 Getting Started (First-Time Setup)
 
 ### Prerequisites
 - [Docker & Docker Compose](https://www.docker.com/)
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (for mobile apps)
-- Python 3.11+ (optional, for local backend development)
+- Python 3.11+ (optional, for local backend development without Docker)
 
-### Running the Backend
+### 1. Clone & Setup the Backend
 
-The backend is fully dockerized for easy setup.
+```bash
+# Clone the repo
+git clone https://github.com/your-org/lifeproject.git
+cd lifeproject
 
-1. Navigate to the backend directory:
-   ```bash
-   cd dropat_backend
-   ```
-2. Make sure you have created your `.env` file from `.env.example`.
-3. Start the services:
-   ```bash
-   docker compose up --build -d
-   ```
-4. Access the API documentation at `http://localhost:8000/docs`.
-5. Access the Admin Dashboard at `http://localhost:8000/admin`.
+# Navigate to backend
+cd dropat_backend
 
-### Running the Mobile Apps
+# Create your environment file from the template
+cp .env.example .env
 
-1. Navigate to the respective app directory (`dropat_user` or `dropat_driver`).
-2. Fetch dependencies:
-   ```bash
-   flutter pub get
-   ```
-3. Run the app on a connected device or emulator:
-   ```bash
-   flutter run
-   ```
+# Start everything with one command
+make setup
+```
+
+This will:
+- Build the Docker containers (FastAPI API + PostgreSQL)
+- Wait for the database to be healthy
+- Seed the database with sample routes and vouchers
+
+**Verify it's running:**
+```bash
+curl http://localhost:8000/health
+# → {"status":"ok","version":"1.0.0","environment":"development"}
+```
+
+- **API Docs**: http://localhost:8000/docs
+- **Admin Panel**: http://localhost:8000/admin
+
+### 2. Run the Flutter User App
+
+```bash
+cd ../dropat_user
+flutter pub get
+flutter run
+```
+
+By default, the app connects to the **production Railway backend**. To connect to your **local Docker backend** instead:
+
+```bash
+# Find your computer's local IP address
+# macOS:
+ipconfig getifaddr en0
+# Linux:
+hostname -I | awk '{print $1}'
+
+# Run Flutter with local backend
+flutter run --dart-define=API_BASE_URL=http://<YOUR-IP>:8000/api/v1
+
+# Example:
+flutter run --dart-define=API_BASE_URL=http://192.168.0.100:8000/api/v1
+```
+
+> **Note for iOS Simulator**: Use `http://localhost:8000/api/v1`  
+> **Note for Android Emulator**: Use `http://10.0.2.2:8000/api/v1`
+
+### 3. Run the Flutter Driver App
+
+```bash
+cd ../dropat_driver
+flutter pub get
+flutter run
+```
+
+Same `--dart-define` override applies for local development.
+
+---
+
+## 🔧 Useful Commands (Backend)
+
+All commands should be run from the `dropat_backend/` directory:
+
+| Command | Description |
+|---------|-------------|
+| `make setup` | First-time setup (build + seed) |
+| `make dev` | Start Docker containers |
+| `make stop` | Stop all containers |
+| `make logs` | Tail API container logs |
+| `make seed` | Seed database with sample data |
+| `make health` | Check API health |
+| `make rebuild` | Rebuild API after changing `requirements.txt` |
+| `make clean` | Stop containers + delete DB data ⚠️ |
+
+---
+
+## 🛠️ Troubleshooting
+
+### "Network Error" when booking / loading routes
+**Cause**: The app can't reach the backend.  
+**Fix**: 
+1. Check the backend is running: `curl http://localhost:8000/health`
+2. If using a physical device, make sure your phone and computer are on the **same Wi-Fi network**
+3. Use `--dart-define` to point to your local IP (not `localhost`)
+
+### Docker containers won't start
+```bash
+# Check if port 5432 or 8000 is already in use
+lsof -i :5432
+lsof -i :8000
+
+# Kill any existing process, then retry
+make dev
+```
+
+### "address already in use" error
+Another process is using port 8000 or 5432. Kill it:
+```bash
+# Find and kill the process on port 8000
+kill -9 $(lsof -t -i :8000)
+make dev
+```
+
+### Flutter app shows demo/fake data
+The app falls back to demo data when it can't reach the backend. This is expected when:
+- The backend is not running
+- Your phone can't resolve the Railway domain (ISP blocking)
+
+Fix: Start the local backend and use `--dart-define` to point to it.
+
+### Firebase / Google Services errors
+Firebase config files are gitignored for security. You need to:
+1. Get `GoogleService-Info.plist` (iOS) from the Firebase Console
+2. Get `google-services.json` (Android) from the Firebase Console
+3. Place them in the correct directories:
+   - iOS: `dropat_user/ios/Runner/GoogleService-Info.plist`
+   - Android: `dropat_user/android/app/google-services.json`
+
+---
 
 ## 🤝 Contributing & Branching Strategy
 

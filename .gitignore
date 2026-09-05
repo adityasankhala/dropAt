@@ -20,10 +20,13 @@
 # Firebase
 **/firebase_options.dart
 
-# Environment files
+# Environment files (secrets — never commit!)
 .env
 .env.*
 *.env
+# BUT always track the template so teammates know what vars to set
+!.env.example
+!**/.env.example
 
 # Mac / OS
 .DS_Store

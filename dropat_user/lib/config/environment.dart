@@ -1,6 +1,12 @@
 class Environment {
-  /// Base URL for the FastAPI backend
-  /// Fallback for Android emulator is 10.0.2.2, for iOS simulator it's localhost
+  /// Base URL for the FastAPI backend.
+  ///
+  /// Default points to the production Railway deployment.
+  /// To use a LOCAL backend during development, override with:
+  ///   flutter run --dart-define=API_BASE_URL=http://<YOUR-MAC-IP>:8000/api/v1
+  ///
+  /// Example (find your IP with `ipconfig getifaddr en0`):
+  ///   flutter run --dart-define=API_BASE_URL=http://192.168.0.100:8000/api/v1
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'https://lifeproject-production-58dd.up.railway.app/api/v1',
