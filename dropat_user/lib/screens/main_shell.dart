@@ -41,6 +41,8 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
     return NotificationListener<TabNavigationNotification>(
       onNotification: (notification) {
         setState(() => _currentIndex = notification.index);
@@ -48,15 +50,73 @@ class _MainShellState extends State<MainShell> {
       },
       child: Scaffold(
         extendBody: true,
-        drawer: _buildDrawer(),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
+        drawer: isDesktop ? null : _buildDrawer(),
+        body: Row(
+          children: [
+            if (isDesktop)
+              NavigationRail(
+                selectedIndex: _currentIndex,
+                onDestinationSelected: (int index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                backgroundColor: DropAtColors.white,
+                selectedIconTheme: const IconThemeData(color: DropAtColors.primaryDark),
+                unselectedIconTheme: IconThemeData(color: DropAtColors.black.withOpacity(0.45)),
+                selectedLabelTextStyle: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12,
+                  color: DropAtColors.primaryDark,
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelTextStyle: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12,
+                  color: DropAtColors.black.withOpacity(0.45),
+                ),
+                labelType: NavigationRailLabelType.all,
+                useIndicator: true,
+                indicatorColor: DropAtColors.primary.withOpacity(0.2),
+                destinations: const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home_rounded),
+                    label: Text('Home'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.directions_bus_outlined),
+                    selectedIcon: Icon(Icons.directions_bus_rounded),
+                    label: Text('Shuttle'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.history_outlined),
+                    selectedIcon: Icon(Icons.history_rounded),
+                    label: Text('Rides'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.person_outline_rounded),
+                    selectedIcon: Icon(Icons.person_rounded),
+                    label: Text('Account'),
+                  ),
+                ],
+              ),
+            if (isDesktop)
+               const VerticalDivider(thickness: 1, width: 1, color: DropAtColors.lightGrey),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
+            ),
+          ],
         ),
-        bottomNavigationBar: DropAtBottomNavBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-        ),
+        bottomNavigationBar: isDesktop
+            ? null
+            : DropAtBottomNavBar(
+                currentIndex: _currentIndex,
+                onTap: (index) => setState(() => _currentIndex = index),
+              ),
       ),
     );
   }

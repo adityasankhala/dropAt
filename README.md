@@ -125,14 +125,33 @@ cd dropat_user
 
 # Install Flutter dependencies
 flutter pub get
-
-# Set up your Google Maps API key in local config:
-# Android: add GOOGLE_MAPS_API_KEY=your-key to android/local.properties
-# iOS: add GOOGLE_MAPS_API_KEY=your-key to ios/Flutter/Secrets.xcconfig
-
-# Run on a connected device or emulator
-flutter run --dart-define=GOOGLE_MAPS_API_KEY=your-key-here
 ```
+
+#### Running on Mobile (iOS / Android)
+
+Set up your Google Maps API key securely in the local configuration files:
+- **Android:** Add `GOOGLE_MAPS_API_KEY=your-key` to `android/local.properties`
+- **iOS:** Add `GOOGLE_MAPS_API_KEY=your-key` to `ios/Flutter/Secrets.xcconfig`
+
+Run the app on a connected mobile device or emulator:
+```bash
+flutter run
+```
+*(The UI automatically adapts to a classic mobile layout with a bottom navigation bar.)*
+
+#### Running on Web / Desktop Browsers
+
+To run the app as a fully responsive Web Application, inject the API key directly into the run command since the web builder does not read from mobile config files:
+
+```bash
+flutter run -d web-server --web-port 5000 --dart-define=GOOGLE_MAPS_API_KEY=your-key-here
+```
+*(Note: If you encounter a Google Sign-In `origin_mismatch` error, ensure your Google Cloud OAuth Client ID allows the `http://localhost:5000` Authorized JavaScript Origin.)*
+
+**Responsive UI Logic:**
+The User App uses a `LayoutBuilder` to adapt across devices:
+- **Mobile (`width <= 800`):** Uses a bottom navigation bar and anchored bottom-sheet overlays.
+- **Desktop/Web (`width > 800`):** Transforms into a Desktop Website layout, utilizing a side Navigation Rail, full-screen map background, and floating left-aligned dashboard widgets mimicking modern web apps.
 
 ### 4. Driver App Setup
 

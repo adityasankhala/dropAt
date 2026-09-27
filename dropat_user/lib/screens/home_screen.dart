@@ -204,6 +204,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
     return Stack(
       children: [
         // Map
@@ -227,20 +229,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (!_showLocationSearch)
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.only(
+                left: isDesktop ? 32 : 16,
+                right: 16,
+                top: isDesktop ? 32 : 8,
+                bottom: 8,
+              ),
               child: Row(
                 children: [
-                  // Hamburger Menu — opens MainShell drawer
-                  Builder(
-                    builder: (innerContext) => _circleButton(
-                      Icons.menu_rounded,
-                      () => Scaffold.of(innerContext).openDrawer(),
+                  // Hamburger Menu — opens MainShell drawer (hidden on desktop since we have side rail)
+                  if (!isDesktop)
+                    Builder(
+                      builder: (innerContext) => _circleButton(
+                        Icons.menu_rounded,
+                        () => Scaffold.of(innerContext).openDrawer(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
+                  if (!isDesktop) const SizedBox(width: 8),
                   Expanded(
                     child: Container(
                       height: 44,
+                      constraints: BoxConstraints(maxWidth: isDesktop ? 400 : double.infinity),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         color: DropAtColors.white,
@@ -256,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  if (isDesktop) const Spacer(),
                   const SizedBox(width: 8),
                   _circleButton(Icons.my_location_rounded, () {
                     _mapController?.animateCamera(CameraUpdate.newLatLngZoom(_currentPos, 15));
@@ -268,31 +278,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         // Location search overlay
         if (_showLocationSearch) _buildSearchOverlay(),
 
-        // Integrated Bottom UI
+        // Integrated Bottom/Side UI
         if (!_showLocationSearch)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: FadeTransition(
-              opacity: _sheetAnimation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.4),
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: _sheetAnimation,
-                  curve: Curves.easeOutCubic,
-                )),
-                child: _buildMainUI(),
-              ),
-            ),
-          ),
+          isDesktop
+              ? Positioned(
+                  left: 32,
+                  top: 96,
+                  width: 380,
+                  child: _buildMainUI(isDesktop: true),
+                )
+              : Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: FadeTransition(
+                    opacity: _sheetAnimation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.4),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: _sheetAnimation,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: _buildMainUI(isDesktop: false),
+                    ),
+                  ),
+                ),
       ],
     );
   }
 
-  Widget _buildMainUI() {
+  Widget _buildMainUI({bool isDesktop = false}) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.transparent,
@@ -303,26 +320,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // Dashboard Content
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 12),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             decoration: BoxDecoration(
               color: DropAtColors.white.withOpacity(0.95),
               borderRadius: BorderRadius.circular(28),
               boxShadow: DropAtShadows.medium,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _animatedSearchBar(),
-                const SizedBox(height: 12),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(28),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _animatedSearchBar(),
+                    const SizedBox(height: 12),
 
-                // Recent Places List (Snippet)
-                _recentTripItem(Icons.access_time_rounded, 'Elements Mall Jaipur', 'Subway Elements Mall...'),
-                _recentTripItem(Icons.access_time_rounded, 'Dyore Restaurant', 'Experience 16 Pari...'),
-                _recentTripItem(Icons.access_time_rounded, 'Manipal University', 'Manipal University Jaipur...'),
-              ],
+                    // Recent Places List
+                    _savedPlaceTile(Icons.access_time_rounded, 'Elements Mall Jaipur', 'Ajmer Road, Jaipur', const LatLng(26.9030, 75.7533)),
+                    _savedPlaceTile(Icons.access_time_rounded, 'Dyore Restaurant', 'C-Scheme, Jaipur', const LatLng(26.9150, 75.7950)),
+                    _savedPlaceTile(Icons.access_time_rounded, 'Manipal University', 'Dehmi Kalan, Jaipur', const LatLng(26.8438, 75.5652)),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 100), // Clearance for glassy nav
+          if (!isDesktop) const SizedBox(height: 100), // Clearance for glassy nav
         ],
       ),
     );
@@ -386,27 +409,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _recentTripItem(IconData icon, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Icon(icon, color: DropAtColors.grey, size: 20),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: DropAtTextStyles.label.copyWith(fontSize: 14)),
-                Text(subtitle, style: DropAtTextStyles.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: DropAtColors.grey, size: 20),
-        ],
-      ),
-    );
-  }
+
 
   void _onSelectQuickDestination(LatLng destination, String address) {
     setState(() {
