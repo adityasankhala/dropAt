@@ -41,9 +41,14 @@ async def get_session() -> AsyncSession:
 
 
 async def init_db():
-    """Create all tables from SQLModel metadata.
-    In production, use Alembic migrations instead.
+    """Create local-development tables only.
+
+    Production schema changes are applied by ``alembic upgrade head`` before
+    Uvicorn starts.  Keeping implicit schema creation out of production makes
+    every database change reviewable and reversible.
     """
+    if not settings.AUTO_CREATE_SCHEMA:
+        return
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

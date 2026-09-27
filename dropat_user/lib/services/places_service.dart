@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PlacesService {
-  // Google Maps API Key
-  static const String apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+  // Google Maps API Key — pass via: --dart-define=GOOGLE_MAPS_API_KEY=your-key
+  static const String apiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
 
   /// AUTOCOMPLETE SUGGESTIONS
   static Future<List<Map<String, dynamic>>> getSuggestions(String input) async {

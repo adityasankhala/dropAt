@@ -5,6 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.security import get_current_user
+from app.models.booking import Booking, BookingStatus
+from app.models.driver import Driver
+from app.models.trip import Trip
+from app.models.user import User
+from sqlalchemy import select
 from app.schemas.schemas import (
     LocationBatchRequest,
     LocationResponse,
@@ -23,10 +28,6 @@ async def update_location(
     """
     Called by Driver app to push batch GPS updates.
     """
-    from app.models.user import User
-    from app.models.driver import Driver
-    from sqlalchemy import select
-    
     result = await session.execute(
         select(Driver).join(User).where(User.firebase_uid == current_user["uid"])
     )
@@ -57,9 +58,39 @@ async def update_location(
 @router.get("/trip/{trip_id}", response_model=LocationResponse)
 async def get_trip_location(
     trip_id: uuid.UUID,
+    current_user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    """Get latest location for a trip's driver."""
+    """Get a trip's latest location when the caller is a passenger or driver."""
+    user_result = await session.execute(
+        select(User).where(User.firebase_uid == current_user["uid"])
+    )
+    user = user_result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found in database")
+
+    trip_result = await session.execute(select(Trip).where(Trip.id == trip_id))
+    trip = trip_result.scalar_one_or_none()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    is_assigned_driver = False
+    if trip.driver_id:
+        driver_result = await session.execute(
+            select(Driver).where(Driver.id == trip.driver_id, Driver.user_id == user.id)
+        )
+        is_assigned_driver = driver_result.scalar_one_or_none() is not None
+
+    booking_result = await session.execute(
+        select(Booking).where(
+            Booking.trip_id == trip_id,
+            Booking.user_id == user.id,
+            Booking.status.notin_([BookingStatus.CANCELLED, BookingStatus.REFUNDED]),
+        )
+    )
+    if not is_assigned_driver and booking_result.scalar_one_or_none() is None:
+        raise HTTPException(status_code=403, detail="You do not have access to this trip")
+
     location = await TrackingService.get_trip_location(session, trip_id)
     if not location:
         raise HTTPException(status_code=404, detail="Location not found")

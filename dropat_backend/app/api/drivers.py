@@ -87,6 +87,8 @@ async def get_trip_manifest(
     trip = trip_result.scalar_one_or_none()
     if not trip:
         raise HTTPException(status_code=404, detail="Trip not found")
+    if trip.driver_id != driver.id:
+        raise HTTPException(status_code=403, detail="You are not assigned to this trip")
         
     # Get all confirmed bookings for this trip
     booking_result = await session.execute(

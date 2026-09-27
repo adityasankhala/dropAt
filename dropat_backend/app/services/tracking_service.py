@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.location_update import LocationUpdate
 from app.models.driver import Driver
+from app.models.trip import Trip
 
 
 class TrackingService:
@@ -45,6 +46,22 @@ class TrackingService:
         Upsert a driver's current location.
         Uses upsert pattern (one row per driver) to avoid table bloat.
         """
+        if trip_id is not None:
+            trip = await session.get(Trip, trip_id)
+            if trip is None:
+                raise ValueError("Trip not found")
+            if trip.driver_id != driver_id:
+                raise ValueError("Driver is not assigned to this trip")
+
+        if not -90 <= lat <= 90 or not -180 <= lng <= 180:
+            raise ValueError("Invalid GPS coordinates")
+        if heading is not None and not 0 <= heading <= 360:
+            raise ValueError("Invalid heading")
+        if accuracy is not None and accuracy < 0:
+            raise ValueError("Invalid GPS accuracy")
+        if battery_level is not None and not 0 <= battery_level <= 100:
+            raise ValueError("Invalid battery level")
+
         # Check for existing location record for this driver
         result = await session.execute(
             select(LocationUpdate).where(LocationUpdate.driver_id == driver_id)

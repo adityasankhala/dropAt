@@ -11,6 +11,7 @@ from typing import Optional
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.booking import Booking, BookingStatus, BookingType
 from app.models.trip import Trip, TripStatus
@@ -44,7 +45,10 @@ class BookingService:
         Raises ValueError if no seats available or trip not found.
         """
         # 1. Fetch the trip and check availability
-        trip = await session.get(Trip, trip_id)
+        trip_result = await session.execute(
+            select(Trip).where(Trip.id == trip_id).with_for_update()
+        )
+        trip = trip_result.scalar_one_or_none()
         if trip is None:
             raise ValueError("Trip not found")
         if trip.status == TripStatus.CANCELLED:
@@ -56,6 +60,21 @@ class BookingService:
         route = await session.get(Route, trip.route_id)
         if route is None:
             raise ValueError("Route not found for this trip")
+
+        # Only persisted route stops can be selected, and riders must travel
+        # forward along the route.  This prevents arbitrary pickup/drop values
+        # from becoming booking records.
+        waypoint_result = await session.execute(
+            select(Waypoint)
+            .where(Waypoint.route_id == route.id)
+            .order_by(Waypoint.order)
+        )
+        waypoints = waypoint_result.scalars().all()
+        stops = {waypoint.name: waypoint.order for waypoint in waypoints}
+        if boarding_stop_name not in stops or alighting_stop_name not in stops:
+            raise ValueError("Boarding and alighting stops must belong to the route")
+        if stops[boarding_stop_name] >= stops[alighting_stop_name]:
+            raise ValueError("Alighting stop must be after boarding stop")
 
         # 3. Check for duplicate booking
         existing = await session.execute(
@@ -78,7 +97,7 @@ class BookingService:
                 select(Voucher).where(
                     Voucher.code == voucher_code.upper().strip(),
                     Voucher.is_active == True,
-                )
+                ).with_for_update()
             )
             voucher = voucher_result.scalar_one_or_none()
             if voucher and voucher.is_valid:
@@ -95,7 +114,11 @@ class BookingService:
             user_id=user_id,
             trip_id=trip_id,
             booking_type=BookingType.SHUTTLE,
-            status=BookingStatus.CONFIRMED if payment_method == "CASH" else BookingStatus.PENDING,
+            status=(
+                BookingStatus.CONFIRMED
+                if payment_method.upper() == "CASH" or total_paid == 0
+                else BookingStatus.PENDING
+            ),
             boarding_stop_name=boarding_stop_name,
             alighting_stop_name=alighting_stop_name,
             boarding_stop_lat=boarding_stop_lat,
@@ -107,7 +130,7 @@ class BookingService:
             total_paid=total_paid,
             payment_method=payment_method,
             voucher_id=voucher_id,
-            schedule_time=schedule_time,
+            schedule_time=trip.departure_time.strftime("%I:%M %p"),
         )
         session.add(booking)
 
@@ -191,7 +214,11 @@ class BookingService:
         offset: int = 0,
     ) -> tuple[list[Booking], int]:
         """Get paginated bookings for a user."""
-        query = select(Booking).where(Booking.user_id == user_id)
+        query = (
+            select(Booking)
+            .options(selectinload(Booking.trip).selectinload(Trip.route))
+            .where(Booking.user_id == user_id)
+        )
 
         if booking_type:
             query = query.where(Booking.booking_type == booking_type)

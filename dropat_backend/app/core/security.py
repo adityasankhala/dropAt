@@ -5,13 +5,19 @@ Verifies Firebase ID tokens sent from Flutter apps.
 Caches Google's public signing keys to avoid network calls on every request.
 """
 
+import hmac
 import time
 from typing import Optional
 
 import httpx
 from cachetools import TTLCache
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import (
+    HTTPBasic,
+    HTTPBasicCredentials,
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
 from jose import jwt, JWTError, jwk
 from jose.utils import base64url_decode
 
@@ -28,6 +34,7 @@ _keys_cache: TTLCache = TTLCache(maxsize=1, ttl=3600)
 
 # Bearer token extractor
 _bearer_scheme = HTTPBearer(auto_error=False)
+_basic_scheme = HTTPBasic(auto_error=False)
 
 
 async def _fetch_google_public_keys() -> dict:
@@ -35,7 +42,7 @@ async def _fetch_google_public_keys() -> dict:
     if "keys" in _keys_cache:
         return _keys_cache["keys"]
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         response = await client.get(GOOGLE_JWKS_URL)
         response.raise_for_status()
         keys_data = response.json()
@@ -157,3 +164,24 @@ async def get_optional_user(
         return await verify_firebase_token(credentials.credentials)
     except HTTPException:
         return None
+
+
+def require_admin(
+    credentials: Optional[HTTPBasicCredentials] = Depends(_basic_scheme),
+) -> None:
+    """Protect the server-rendered admin panel with constant-time Basic Auth."""
+    if not settings.ADMIN_USERNAME or not settings.ADMIN_PASSWORD:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Admin access has not been configured",
+        )
+
+    is_valid = credentials is not None and hmac.compare_digest(
+        credentials.username, settings.ADMIN_USERNAME
+    ) and hmac.compare_digest(credentials.password, settings.ADMIN_PASSWORD)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )

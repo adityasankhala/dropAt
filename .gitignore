@@ -12,10 +12,12 @@
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Runner/GoogleService-Info.plist
+**/macos/Runner/GoogleService-Info.plist
 
 # Android
 **/android/local.properties
 **/android/app/google-services.json
+**/android/app/src/google-services.json
 
 # Firebase
 **/firebase_options.dart
@@ -27,6 +29,8 @@
 # BUT always track the template so teammates know what vars to set
 !.env.example
 !**/.env.example
+!production.env.example
+!**/production.env.example
 
 # Mac / OS
 .DS_Store

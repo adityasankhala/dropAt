@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'firebase_options.dart';
 import 'services/supabase_service.dart';
 import 'theme/driver_theme.dart';
 import 'screens/driver_splash_screen.dart';
@@ -10,7 +9,9 @@ import 'screens/driver_main_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Android and Apple builds read their Firebase configuration from the native
+  // google-services files. Those files are intentionally supplied outside git.
+  await Firebase.initializeApp();
   await SupabaseService.initialize();
   runApp(const DropAtDriverApp());
 }

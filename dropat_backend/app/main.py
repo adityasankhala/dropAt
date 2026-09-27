@@ -6,13 +6,16 @@ Main entry point for the REST API.
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from sqlalchemy import text
 
 from app.api.router import api_router
 from app.admin.routes import router as admin_router
 from app.core.config import settings
-from app.core.database import init_db, close_db
+from app.core.database import async_session_factory, init_db, close_db
 
 
 @asynccontextmanager
@@ -43,6 +46,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+if settings.TRUSTED_HOSTS:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.TRUSTED_HOSTS)
+
 # Include all API routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
@@ -52,7 +60,13 @@ app.include_router(admin_router, prefix="/admin", tags=["admin"])
 
 @app.get("/health", tags=["health"])
 async def health_check():
-    """Health check endpoint."""
+    """Readiness check used by deployment health probes."""
+    try:
+        async with async_session_factory() as session:
+            await session.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Database unavailable") from exc
+
     return {
         "status": "ok",
         "version": "1.0.0",
@@ -60,9 +74,17 @@ async def health_check():
     }
 
 
+@app.get("/health/live", tags=["health"])
+async def liveness_check():
+    """Process liveness check that does not depend on external services."""
+    return {"status": "ok"}
+
+
 @app.post("/seed", tags=["admin"])
 async def seed_database():
     """One-time seed endpoint for production database."""
+    if not settings.is_development:
+        raise HTTPException(status_code=404, detail="Not found")
     from app.core.database import async_session_factory
     from app.models.route import Route
     from app.models.waypoint import Waypoint

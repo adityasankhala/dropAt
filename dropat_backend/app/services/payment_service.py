@@ -37,7 +37,6 @@ class PaymentService:
         session: AsyncSession,
         booking_id: uuid.UUID,
         user_id: uuid.UUID,
-        amount: float,
         method: str = "upi",
     ) -> dict:
         """
@@ -51,12 +50,46 @@ class PaymentService:
         if booking.user_id != user_id:
             raise ValueError("Booking does not belong to this user")
 
-        # Amount in paise (Razorpay uses smallest currency unit)
-        amount_paise = int(amount * 100)
+        if booking.status != BookingStatus.PENDING:
+            raise ValueError("This booking is not awaiting online payment")
+        if booking.total_paid <= 0:
+            raise ValueError("This booking does not require an online payment")
+
+        try:
+            payment_method = PaymentMethod(method.lower())
+        except ValueError as exc:
+            raise ValueError("Unsupported payment method") from exc
+        if payment_method == PaymentMethod.CASH:
+            raise ValueError("Cash bookings do not use an online payment order")
+
+        # The server, never the client, is the source of truth for payment value.
+        amount_paise = round(booking.total_paid * 100)
+
+        # Returning an existing unexpired order makes a retried mobile request
+        # idempotent and avoids charging a rider twice.
+        existing_result = await session.execute(
+            select(Payment).where(
+                Payment.booking_id == booking_id,
+                Payment.user_id == user_id,
+                Payment.status == PaymentStatus.CREATED,
+            )
+        )
+        existing_payment = existing_result.scalar_one_or_none()
+        if existing_payment and existing_payment.razorpay_order_id:
+            return {
+                "order_id": existing_payment.razorpay_order_id,
+                "amount": round(existing_payment.amount * 100),
+                "currency": existing_payment.currency,
+                "key_id": settings.RAZORPAY_KEY_ID,
+                "payment_id": str(existing_payment.id),
+            }
+
+        if not settings.PAYMENTS_ENABLED:
+            raise ValueError("Online payments are currently unavailable")
 
         # Create Razorpay order
         client = PaymentService._get_razorpay_client()
-        if client:
+        if client and settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET:
             order_data = client.order.create({
                 "amount": amount_paise,
                 "currency": "INR",
@@ -67,16 +100,18 @@ class PaymentService:
                 },
             })
             razorpay_order_id = order_data["id"]
-        else:
+        elif settings.ALLOW_DEV_PAYMENT_FALLBACK:
             # Development fallback — mock order
             razorpay_order_id = f"order_dev_{uuid.uuid4().hex[:16]}"
+        else:
+            raise ValueError("Online payments are not configured")
 
         # Create payment record
         payment = Payment(
             booking_id=booking_id,
             user_id=user_id,
-            amount=amount,
-            method=PaymentMethod(method) if method in PaymentMethod.__members__.values() else PaymentMethod.UPI,
+            amount=booking.total_paid,
+            method=payment_method,
             status=PaymentStatus.CREATED,
             razorpay_order_id=razorpay_order_id,
         )
@@ -94,6 +129,7 @@ class PaymentService:
     @staticmethod
     async def verify_payment(
         session: AsyncSession,
+        user_id: uuid.UUID,
         razorpay_order_id: str,
         razorpay_payment_id: str,
         razorpay_signature: str,
@@ -108,6 +144,14 @@ class PaymentService:
         payment = result.scalar_one_or_none()
         if payment is None:
             raise ValueError("Payment not found")
+        if payment.user_id != user_id:
+            raise ValueError("Payment does not belong to this user")
+        if payment.status == PaymentStatus.CAPTURED:
+            if payment.razorpay_payment_id == razorpay_payment_id:
+                return payment
+            raise ValueError("Payment has already been captured")
+        if payment.status != PaymentStatus.CREATED:
+            raise ValueError("Payment cannot be verified in its current state")
 
         # Verify signature
         if settings.RAZORPAY_KEY_SECRET:
@@ -122,6 +166,8 @@ class PaymentService:
                 session.add(payment)
                 await session.flush()
                 raise ValueError("Invalid payment signature")
+        elif not settings.ALLOW_DEV_PAYMENT_FALLBACK:
+            raise ValueError("Payment verification is not configured")
 
         # Update payment record
         payment.razorpay_payment_id = razorpay_payment_id
@@ -158,17 +204,21 @@ class PaymentService:
 
         # Refund via Razorpay
         client = PaymentService._get_razorpay_client()
-        if client and payment.razorpay_payment_id:
-            try:
-                client.payment.refund(
-                    payment.razorpay_payment_id,
-                    {
-                        "amount": int(refund_amount * 100),
-                        "notes": {"reason": reason},
-                    },
-                )
-            except Exception:
-                pass  # Log but don't block — manual reconciliation
+        if not settings.PAYMENTS_ENABLED:
+            raise ValueError("Online payments are currently unavailable")
+        if not client or not payment.razorpay_payment_id:
+            raise ValueError("Refund provider is not configured")
+
+        try:
+            client.payment.refund(
+                payment.razorpay_payment_id,
+                {
+                    "amount": round(refund_amount * 100),
+                    "notes": {"reason": reason},
+                },
+            )
+        except Exception as exc:
+            raise ValueError("Refund could not be processed") from exc
 
         payment.status = (
             PaymentStatus.REFUNDED

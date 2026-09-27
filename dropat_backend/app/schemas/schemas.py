@@ -197,7 +197,6 @@ class CancelBookingRequest(BaseModel):
 
 class CreatePaymentOrderRequest(BaseModel):
     booking_id: uuid.UUID
-    amount: float
     method: str = "upi"  # upi, card, wallet
 
 

@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_session
+from app.core.security import require_admin
 from app.models.user import User
 from app.models.driver import Driver
 from app.models.route import Route
@@ -27,7 +28,7 @@ from app.models.payment import Payment
 
 templates = Jinja2Templates(directory="app/admin/templates")
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_admin)])
 
 
 # ─── Dashboard ───────────────────────────────────────────

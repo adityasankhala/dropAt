@@ -24,7 +24,6 @@ class PaymentGatewayService {
       // 1. Create order on backend
       final orderData = await _api.post('/payments/create-order', body: {
         'booking_id': bookingId,
-        'amount': amount,
         'method': method,
       });
 

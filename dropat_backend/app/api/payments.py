@@ -14,6 +14,20 @@ from app.services.payment_service import PaymentService
 router = APIRouter()
 
 
+async def _get_db_user_id(session: AsyncSession, firebase_uid: str):
+    """Resolve the authenticated Firebase identity to the local user record."""
+    from app.models.user import User
+    from sqlalchemy import select
+
+    result = await session.execute(
+        select(User).where(User.firebase_uid == firebase_uid)
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found in database")
+    return user.id
+
+
 @router.post("/create-order", response_model=CreatePaymentOrderResponse)
 async def create_order(
     request: CreatePaymentOrderRequest,
@@ -21,19 +35,12 @@ async def create_order(
     session: AsyncSession = Depends(get_session),
 ):
     """Create a Razorpay payment order for a booking."""
-    from app.models.user import User
-    from sqlalchemy import select
-    result = await session.execute(select(User).where(User.firebase_uid == current_user["uid"]))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found in database")
-
     try:
+        user_id = await _get_db_user_id(session, current_user["uid"])
         order_details = await PaymentService.create_order(
             session=session,
             booking_id=request.booking_id,
-            user_id=user.id,
-            amount=request.amount,
+            user_id=user_id,
             method=request.method,
         )
         return CreatePaymentOrderResponse(**order_details)
@@ -49,8 +56,10 @@ async def verify_payment(
 ):
     """Verify Razorpay payment signature."""
     try:
+        user_id = await _get_db_user_id(session, current_user["uid"])
         payment = await PaymentService.verify_payment(
             session=session,
+            user_id=user_id,
             razorpay_order_id=request.razorpay_order_id,
             razorpay_payment_id=request.razorpay_payment_id,
             razorpay_signature=request.razorpay_signature,

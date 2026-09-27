@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'firebase_options.dart';
 import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
@@ -12,7 +11,9 @@ import 'screens/main_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Android and Apple builds read their Firebase configuration from the native
+  // google-services files. Those files are intentionally supplied outside git.
+  await Firebase.initializeApp();
   await SupabaseService.initialize();
 
   // ProviderScope is the root of all Riverpod providers.

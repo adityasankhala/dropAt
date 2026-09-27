@@ -37,10 +37,11 @@ def _format_booking_response(booking: Booking) -> BookingResponse:
         cancellation_reason=booking.cancellation_reason,
         created_at=booking.created_at,
         updated_at=booking.updated_at,
-        # In a real app we'd fetch these from relations
+        # Driver details are deliberately omitted until they are loaded from
+        # persisted relations. Returning invented data here is misleading.
         route_name=booking.trip.route.name if booking.trip and booking.trip.route else None,
-        driver_name="Saksham Jain" if booking.driver_id else None,
-        vehicle_number="RJ 14 AB 1234" if booking.driver_id else None,
+        driver_name=None,
+        vehicle_number=None,
     )
 
 
@@ -52,10 +53,6 @@ async def book_shuttle(
 ):
     """Book a seat on a shuttle trip."""
     try:
-        user_id = uuid.UUID(current_user["uid"]) # Assuming JWT uses UUID string, might need adjustment if Firebase UID
-        # Actually our token verify returns the firebase_uid in `uid`, but we need our Postgres User ID
-        # Let's assume a helper or we query it. For now, since `get_current_user` returns the token payload,
-        # we'll look up the user.
         from app.models.user import User
         from sqlalchemy import select
         result = await session.execute(select(User).where(User.firebase_uid == current_user["uid"]))

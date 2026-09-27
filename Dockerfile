@@ -15,6 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the actual backend code
 COPY dropat_backend/ .
 
-# The PORT environment variable is automatically injected by Railway
-# We use a shell form to ensure the variable expands correctly
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Apply versioned schema changes before accepting traffic. The PORT environment
+# variable is automatically injected by Railway.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
