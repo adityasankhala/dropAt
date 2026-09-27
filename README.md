@@ -86,8 +86,8 @@ lifeproject/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/adityasankhala/lifeproject.git
-cd lifeproject
+git clone https://github.com/adityasankhala/dropAt.git
+cd dropAt
 ```
 
 ### 2. Backend Setup
