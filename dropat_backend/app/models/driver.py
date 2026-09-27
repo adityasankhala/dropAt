@@ -1,6 +1,5 @@
 """
 Driver Model
-─────────────
 Links a User to their driver profile and assigned vehicle.
 """
 
@@ -9,7 +8,6 @@ from datetime import datetime
 from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship
-
 
 class Driver(SQLModel, table=True):
     """

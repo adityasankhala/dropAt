@@ -1,8 +1,4 @@
-"""
-DropAt — Payment Service
-──────────────────────────
-Razorpay integration for UPI/card payments.
-"""
+"""Razorpay integration for UPI/card payments."""
 
 import hashlib
 import hmac
@@ -16,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.models.payment import Payment, PaymentStatus, PaymentMethod
 from app.models.booking import Booking, BookingStatus
-
 
 class PaymentService:
     """Razorpay payment integration."""

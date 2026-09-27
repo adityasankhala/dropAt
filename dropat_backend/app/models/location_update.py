@@ -1,6 +1,5 @@
 """
 Location Update Model
-──────────────────────
 GPS pings from drivers.
 Written to the database; Supabase Realtime broadcasts changes
 to subscribed passenger apps.
@@ -11,7 +10,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field
-
 
 class LocationUpdate(SQLModel, table=True):
     """

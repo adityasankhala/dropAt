@@ -1,8 +1,6 @@
 """
 Vehicle Model
-──────────────
 Generic vehicle entity with type enum.
-Phase 1 uses 'shuttle'. Phase 2 adds 'auto', 'bike', 'mini', 'sedan', 'suv'.
 """
 
 import uuid
@@ -12,16 +10,14 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field
 
-
 class VehicleType(str, Enum):
-    """Vehicle type enum — extensible for Phase 2."""
+    """shuttle, auto, bike, mini, sedan, suv."""
     SHUTTLE = "shuttle"
     AUTO = "auto"
     BIKE = "bike"
     MINI = "mini"
     SEDAN = "sedan"
     SUV = "suv"
-
 
 class Vehicle(SQLModel, table=True):
     """

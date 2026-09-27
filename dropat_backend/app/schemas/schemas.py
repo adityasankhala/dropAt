@@ -1,15 +1,10 @@
-"""
-DropAt API — Pydantic Request/Response Schemas
-────────────────────────────────────────────────
-Type-safe API contracts for all endpoints.
-"""
+"""Type-safe API contracts for all endpoints."""
 
 import uuid
 from datetime import datetime, date, time
 from typing import Optional, List
 
 from pydantic import BaseModel, Field, ConfigDict
-
 
 # ═══════════════════════════════════════════════
 # Auth Schemas
@@ -22,14 +17,12 @@ class AuthVerifyRequest(BaseModel):
     email: Optional[str] = None
     photo_url: Optional[str] = None
 
-
 class AuthVerifyResponse(BaseModel):
     """Returned after successful auth verification."""
     user_id: uuid.UUID
     firebase_uid: str
     name: str
     is_new_user: bool
-
 
 # ═══════════════════════════════════════════════
 # User Schemas
@@ -41,7 +34,6 @@ class SavedPlaceSchema(BaseModel):
     address: str
     lat: float
     lng: float
-
 
 class UserProfileResponse(BaseModel):
     id: uuid.UUID
@@ -55,13 +47,11 @@ class UserProfileResponse(BaseModel):
     saved_places: List[SavedPlaceSchema] = []
     created_at: datetime
 
-
 class UserProfileUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
     photo_url: Optional[str] = None
-
 
 # ═══════════════════════════════════════════════
 # Route & Waypoint Schemas
@@ -77,11 +67,9 @@ class WaypointSchema(BaseModel):
     is_fixed: bool = True
     estimated_arrival_offset_min: Optional[int] = None
 
-
 class ScheduleSchema(BaseModel):
     departure_time: str  # e.g. "08:00 AM"
     days: List[str]  # e.g. ["Mon", "Tue", ...]
-
 
 class RouteResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -95,11 +83,9 @@ class RouteResponse(BaseModel):
     waypoints: List[WaypointSchema] = []
     is_active: bool
 
-
 class RouteListResponse(BaseModel):
     routes: List[RouteResponse]
     total: int
-
 
 # ═══════════════════════════════════════════════
 # Trip Schemas
@@ -119,11 +105,9 @@ class TripResponse(BaseModel):
     available_seats: int
     stops: List[WaypointSchema] = []
 
-
 class TripListResponse(BaseModel):
     trips: List[TripResponse]
     total: int
-
 
 # ═══════════════════════════════════════════════
 # Booking Schemas
@@ -142,7 +126,6 @@ class ShuttleBookingRequest(BaseModel):
     payment_method: str = "CASH"
     voucher_code: Optional[str] = None
 
-
 class RideBookingRequest(BaseModel):
     """Request to book an on-demand ride (Phase 2)."""
     pickup_lat: float
@@ -154,7 +137,6 @@ class RideBookingRequest(BaseModel):
     vehicle_type: str  # "BIKE", "AUTO", "MINI", etc.
     payment_method: str = "CASH"
     voucher_code: Optional[str] = None
-
 
 class BookingResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -181,15 +163,12 @@ class BookingResponse(BaseModel):
     driver_rating: Optional[float] = None
     vehicle_number: Optional[str] = None
 
-
 class BookingListResponse(BaseModel):
     bookings: List[BookingResponse]
     total: int
 
-
 class CancelBookingRequest(BaseModel):
     reason: str = Field(max_length=500)
-
 
 # ═══════════════════════════════════════════════
 # Payment Schemas
@@ -199,19 +178,16 @@ class CreatePaymentOrderRequest(BaseModel):
     booking_id: uuid.UUID
     method: str = "upi"  # upi, card, wallet
 
-
 class CreatePaymentOrderResponse(BaseModel):
     order_id: str  # Razorpay order ID
     amount: int  # Amount in paise
     currency: str
     key_id: str  # Razorpay key for client
 
-
 class VerifyPaymentRequest(BaseModel):
     razorpay_order_id: str
     razorpay_payment_id: str
     razorpay_signature: str
-
 
 class PaymentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -222,7 +198,6 @@ class PaymentResponse(BaseModel):
     status: str
     razorpay_order_id: Optional[str]
     created_at: datetime
-
 
 # ═══════════════════════════════════════════════
 # Tracking Schemas
@@ -239,11 +214,9 @@ class LocationUpdateRequest(BaseModel):
     is_moving: bool = True
     trip_id: Optional[uuid.UUID] = None
 
-
 class LocationBatchRequest(BaseModel):
     """Batch of GPS updates."""
     updates: List[LocationUpdateRequest]
-
 
 class LocationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -255,7 +228,6 @@ class LocationResponse(BaseModel):
     is_moving: bool
     timestamp: datetime
 
-
 # ═══════════════════════════════════════════════
 # Driver Schemas
 # ═══════════════════════════════════════════════
@@ -265,13 +237,11 @@ class DriverToggleRequest(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
 
-
 class DriverStatusResponse(BaseModel):
     is_online: bool
     total_trips: int
     total_earnings: float
     rating: float
-
 
 class ManifestPassenger(BaseModel):
     name: str
@@ -280,7 +250,6 @@ class ManifestPassenger(BaseModel):
     alighting_stop: str
     status: str
 
-
 class TripManifestResponse(BaseModel):
     trip_id: uuid.UUID
     route_name: str
@@ -288,10 +257,8 @@ class TripManifestResponse(BaseModel):
     passengers: List[ManifestPassenger]
     total_booked: int
 
-
 class RideStatusUpdateRequest(BaseModel):
     status: str  # "DRIVER_EN_ROUTE", "ARRIVED", "STARTED", "COMPLETED"
-
 
 # ═══════════════════════════════════════════════
 # Voucher Schemas
@@ -309,22 +276,18 @@ class VoucherResponse(BaseModel):
     valid_until: datetime
     is_valid: bool
 
-
 class VoucherListResponse(BaseModel):
     vouchers: List[VoucherResponse]
-
 
 class VoucherValidateRequest(BaseModel):
     code: str
     order_amount: float = 0
-
 
 class VoucherValidateResponse(BaseModel):
     valid: bool
     voucher: Optional[VoucherResponse] = None
     calculated_discount: float = 0
     message: str = ""
-
 
 # ═══════════════════════════════════════════════
 # Review Schemas
@@ -336,7 +299,6 @@ class ReviewRequest(BaseModel):
     feedback: Optional[str] = None
     tip_amount: Optional[float] = None
 
-
 class ReviewResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
@@ -344,7 +306,6 @@ class ReviewResponse(BaseModel):
     feedback: Optional[str]
     tip_amount: Optional[float]
     created_at: datetime
-
 
 # ═══════════════════════════════════════════════
 # Generic Schemas
@@ -354,7 +315,6 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     environment: str
-
 
 class ErrorResponse(BaseModel):
     detail: str

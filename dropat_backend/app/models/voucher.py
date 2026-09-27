@@ -1,6 +1,5 @@
 """
 Voucher Model
-──────────────
 Promo codes and discount vouchers.
 """
 
@@ -9,7 +8,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field
-
 
 class Voucher(SQLModel, table=True):
     """

@@ -1,5 +1,4 @@
 /// DropAt — Tracking Providers (Riverpod)
-/// ──────────────────────────────────────
 /// WHY RIVERPOD?
 /// → StatefulWidget + setState() rebuilds the ENTIRE widget tree on every GPS tick (3-5s).
 ///   With Riverpod, only the map marker widget rebuilds. The rest of the screen stays untouched.

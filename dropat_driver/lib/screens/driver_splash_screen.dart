@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class DriverSplashScreen extends StatefulWidget {
   final Widget? nextScreen;
   const DriverSplashScreen({super.key, this.nextScreen});

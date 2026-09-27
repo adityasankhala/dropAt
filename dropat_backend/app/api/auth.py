@@ -12,7 +12,6 @@ from app.schemas.schemas import AuthVerifyRequest, AuthVerifyResponse
 
 router = APIRouter()
 
-
 @router.post("/verify", response_model=AuthVerifyResponse)
 async def verify_auth(
     request: AuthVerifyRequest,

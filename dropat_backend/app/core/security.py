@@ -1,9 +1,5 @@
-"""
-DropAt Backend — Firebase Auth JWT Verification
-─────────────────────────────────────────────────
-Verifies Firebase ID tokens sent from Flutter apps.
-Caches Google's public signing keys to avoid network calls on every request.
-"""
+"""Verifies Firebase ID tokens sent from Flutter apps.
+Caches Google's public signing keys to avoid network calls on every request."""
 
 import hmac
 import time
@@ -23,7 +19,7 @@ from jose.utils import base64url_decode
 
 from app.core.config import settings
 
-# ── Constants ────────────────────────────────────────────
+# Constants
 GOOGLE_CERTS_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
 GOOGLE_JWKS_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
 FIREBASE_ISSUER = f"https://securetoken.google.com/{settings.FIREBASE_PROJECT_ID}"
@@ -35,7 +31,6 @@ _keys_cache: TTLCache = TTLCache(maxsize=1, ttl=3600)
 # Bearer token extractor
 _bearer_scheme = HTTPBearer(auto_error=False)
 _basic_scheme = HTTPBasic(auto_error=False)
-
 
 async def _fetch_google_public_keys() -> dict:
     """Fetch and cache Google's public JWK keys for Firebase token verification."""
@@ -56,7 +51,6 @@ async def _fetch_google_public_keys() -> dict:
 
     _keys_cache["keys"] = keys
     return keys
-
 
 async def verify_firebase_token(token: str) -> dict:
     """
@@ -127,7 +121,6 @@ async def verify_firebase_token(token: str) -> dict:
             detail="Unable to verify token: authentication service unavailable",
         )
 
-
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer_scheme),
 ) -> dict:
@@ -149,7 +142,6 @@ async def get_current_user(
 
     return await verify_firebase_token(credentials.credentials)
 
-
 async def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer_scheme),
 ) -> Optional[dict]:
@@ -164,7 +156,6 @@ async def get_optional_user(
         return await verify_firebase_token(credentials.credentials)
     except HTTPException:
         return None
-
 
 def require_admin(
     credentials: Optional[HTTPBasicCredentials] = Depends(_basic_scheme),

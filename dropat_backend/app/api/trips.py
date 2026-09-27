@@ -14,7 +14,6 @@ from app.schemas.schemas import TripListResponse, TripResponse
 
 router = APIRouter()
 
-
 @router.get("", response_model=TripListResponse)
 async def list_trips(
     route_id: Optional[uuid.UUID] = None,
@@ -68,7 +67,6 @@ async def list_trips(
         )
         
     return TripListResponse(trips=response_trips, total=len(response_trips))
-
 
 @router.get("/{trip_id}", response_model=TripResponse)
 async def get_trip(

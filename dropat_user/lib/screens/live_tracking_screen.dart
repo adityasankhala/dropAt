@@ -1,5 +1,4 @@
 /// DropAt — Live Tracking Screen
-/// ───────────────────────────────
 /// This screen shows a real-time map with the shuttle's position.
 /// It uses Mapbox GL for the map and Riverpod to listen to Supabase events.
 ///
@@ -91,7 +90,7 @@ class _LiveTrackingScreenState extends ConsumerState<LiveTrackingScreen> {
       ),
       body: Stack(
         children: [
-          // ── MAP ──
+          // MAP
           MapWidget(
             key: const ValueKey('mapbox_tracking'),
             onMapCreated: _onMapCreated,
@@ -103,7 +102,7 @@ class _LiveTrackingScreenState extends ConsumerState<LiveTrackingScreen> {
             ),
           ),
 
-          // ── BOTTOM INFO CARD ──
+          // BOTTOM INFO CARD
           Positioned(
             bottom: 0,
             left: 0,

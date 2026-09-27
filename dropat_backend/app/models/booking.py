@@ -1,9 +1,6 @@
 """
 Booking Model
-──────────────
 A user's reservation on a trip.
-Phase 1: Shuttle seat booking with boarding/alighting stops.
-Phase 2: On-demand ride booking.
 """
 
 import uuid
@@ -13,27 +10,22 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class BookingType(str, Enum):
     """Booking type — shuttle seat vs individual ride."""
     SHUTTLE = "shuttle"
     RIDE = "ride"  # Phase 2
 
-
 class BookingStatus(str, Enum):
     """Booking lifecycle status."""
     PENDING = "pending"  # Payment not yet completed
     CONFIRMED = "confirmed"  # Payment received, seat reserved
-    REQUESTED = "requested"  # Phase 2: Ride requested, searching for driver
-    SEARCHING = "searching"  # Phase 2: Actively matching a driver
-    ACCEPTED = "accepted"  # Driver accepted
+    REQUESTED = "requested"  #     SEARCHING = "searching"  #     ACCEPTED = "accepted"  # Driver accepted
     DRIVER_EN_ROUTE = "driver_en_route"  # Driver on way to pickup
     ARRIVED = "arrived"  # Driver at pickup
     STARTED = "started"  # Ride in progress
     COMPLETED = "completed"  # Ride finished
     CANCELLED = "cancelled"  # Cancelled by user or driver
     REFUNDED = "refunded"  # Payment refunded
-
 
 class Booking(SQLModel, table=True):
     """
@@ -74,8 +66,7 @@ class Booking(SQLModel, table=True):
         default=None, max_length=20
     )  # e.g. "08:00 AM"
 
-    # Phase 2: Ride-specific fields
-    vehicle_type: Optional[str] = Field(default=None, max_length=20)
+    #     vehicle_type: Optional[str] = Field(default=None, max_length=20)
     driver_id: Optional[uuid.UUID] = Field(
         default=None, foreign_key="drivers.id", index=True
     )

@@ -3,7 +3,6 @@ from pydantic import ValidationError
 
 from app.core.config import Settings
 
-
 def production_settings(**overrides):
     values = {
         "APP_ENV": "production",
@@ -21,11 +20,9 @@ def production_settings(**overrides):
     values.update(overrides)
     return Settings(**values)
 
-
 def test_safe_production_configuration_is_accepted():
     settings = production_settings()
     assert settings.is_production
-
 
 @pytest.mark.parametrize(
     "overrides",

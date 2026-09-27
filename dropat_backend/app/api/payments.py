@@ -13,7 +13,6 @@ from app.services.payment_service import PaymentService
 
 router = APIRouter()
 
-
 async def _get_db_user_id(session: AsyncSession, firebase_uid: str):
     """Resolve the authenticated Firebase identity to the local user record."""
     from app.models.user import User
@@ -26,7 +25,6 @@ async def _get_db_user_id(session: AsyncSession, firebase_uid: str):
     if not user:
         raise HTTPException(status_code=401, detail="User not found in database")
     return user.id
-
 
 @router.post("/create-order", response_model=CreatePaymentOrderResponse)
 async def create_order(
@@ -46,7 +44,6 @@ async def create_order(
         return CreatePaymentOrderResponse(**order_details)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.post("/verify", response_model=PaymentResponse)
 async def verify_payment(

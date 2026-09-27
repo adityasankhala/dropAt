@@ -13,7 +13,6 @@ from app.schemas.schemas import (
 
 router = APIRouter()
 
-
 def _format_voucher(voucher: Voucher) -> VoucherResponse:
     return VoucherResponse(
         id=voucher.id,
@@ -26,7 +25,6 @@ def _format_voucher(voucher: Voucher) -> VoucherResponse:
         valid_until=voucher.valid_until,
         is_valid=voucher.is_valid,
     )
-
 
 @router.get("", response_model=VoucherListResponse)
 async def list_vouchers(
@@ -48,7 +46,6 @@ async def list_vouchers(
     return VoucherListResponse(
         vouchers=[_format_voucher(v) for v in valid_vouchers]
     )
-
 
 @router.post("/validate", response_model=VoucherValidateResponse)
 async def validate_voucher(

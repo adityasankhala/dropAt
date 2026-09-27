@@ -1,9 +1,6 @@
 """
 Trip Model
-───────────
 A specific instance of a route being driven.
-Phase 1: Shuttle departing at 8:00 AM on a specific date.
-Phase 2: On-demand ride from A to B.
 """
 
 import uuid
@@ -13,12 +10,9 @@ from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class TripMode(str, Enum):
-    """Trip mode — extensible for Phase 2 on-demand rides."""
-    FIXED_ROUTE = "fixed_route"  # Phase 1: Shuttle following a predefined route
-    ON_DEMAND = "on_demand"  # Phase 2: Point-to-point ride
-
+    """fixed_route or on_demand."""
+    FIXED_ROUTE = "fixed_route"  #     ON_DEMAND = "on_demand"  # 
 
 class TripStatus(str, Enum):
     """Trip lifecycle status."""
@@ -28,13 +22,10 @@ class TripStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
-
 class Trip(SQLModel, table=True):
     """
     A specific trip instance.
-    For Phase 1: links to a Route and has a departure time.
-    For Phase 2: can be a standalone origin→destination trip.
-    """
+    For     For     """
 
     __tablename__ = "trips"
 

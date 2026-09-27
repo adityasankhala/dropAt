@@ -11,7 +11,6 @@ from app.schemas.schemas import RouteListResponse, RouteResponse
 
 router = APIRouter()
 
-
 @router.get("", response_model=RouteListResponse)
 async def list_routes(
     session: AsyncSession = Depends(get_session),

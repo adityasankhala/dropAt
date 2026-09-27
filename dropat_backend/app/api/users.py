@@ -12,7 +12,6 @@ from app.schemas.schemas import UserProfileResponse, UserProfileUpdate, SavedPla
 
 router = APIRouter()
 
-
 async def get_db_user(
     current_user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
@@ -29,12 +28,10 @@ async def get_db_user(
         raise HTTPException(status_code=404, detail="User profile not found")
     return user
 
-
 @router.get("/me", response_model=UserProfileResponse)
 async def get_profile(user: User = Depends(get_db_user)):
     """Get the current user's profile and saved places."""
     return user
-
 
 @router.put("/me", response_model=UserProfileResponse)
 async def update_profile(
@@ -50,7 +47,6 @@ async def update_profile(
     session.add(user)
     await session.flush()
     return user
-
 
 @router.post("/me/saved-places", response_model=SavedPlaceSchema)
 async def add_saved_place(

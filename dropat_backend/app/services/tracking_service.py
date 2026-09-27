@@ -1,9 +1,5 @@
-"""
-DropAt — Tracking Service
-──────────────────────────
-Processes GPS updates from drivers and writes to the database.
-Supabase Realtime automatically broadcasts the changes to subscribed clients.
-"""
+"""Processes GPS updates from drivers and writes to the database.
+Supabase Realtime automatically broadcasts the changes to subscribed clients."""
 
 import uuid
 from datetime import datetime
@@ -15,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.location_update import LocationUpdate
 from app.models.driver import Driver
 from app.models.trip import Trip
-
 
 class TrackingService:
     """

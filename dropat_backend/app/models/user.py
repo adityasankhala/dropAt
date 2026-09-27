@@ -1,6 +1,5 @@
 """
 User Model
-──────────
 Represents both passengers and drivers (unified identity).
 Firebase Auth is the source of truth for authentication;
 this table stores profile data and app-specific fields.
@@ -11,7 +10,6 @@ from datetime import datetime
 from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON
-
 
 class SavedPlace(SQLModel, table=True):
     """User's saved/favourite locations (Home, Work, etc.)."""
@@ -28,7 +26,6 @@ class SavedPlace(SQLModel, table=True):
 
     # Relationships
     user: Optional["User"] = Relationship(back_populates="saved_places")
-
 
 class User(SQLModel, table=True):
     """

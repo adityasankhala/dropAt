@@ -131,7 +131,6 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
     }
   }
 
-
   // 🔑 VERIFY OTP
   Future<void> _verifyOTP() async {
     if (_verificationId == null || _loading) return;

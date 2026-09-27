@@ -1,6 +1,5 @@
 """
 Route Model
-────────────
 A named shuttle route (e.g., "Hostel → College").
 Routes are templates — actual departures are Trip instances.
 """
@@ -10,7 +9,6 @@ from datetime import datetime
 from typing import Optional, List
 
 from sqlmodel import SQLModel, Field, Relationship, Column, JSON
-
 
 class Route(SQLModel, table=True):
     """

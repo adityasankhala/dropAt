@@ -1,9 +1,5 @@
-"""
-DropAt — Booking Service
-─────────────────────────
-Core business logic for shuttle and ride bookings.
-Handles seat availability, atomic reservations, and cancellations.
-"""
+"""Core business logic for shuttle and ride bookings.
+Handles seat availability, atomic reservations, and cancellations."""
 
 import uuid
 from datetime import datetime
@@ -20,7 +16,6 @@ from app.models.waypoint import Waypoint
 from app.models.voucher import Voucher
 from app.models.user import User
 from app.models.driver import Driver
-
 
 class BookingService:
     """Business logic for booking operations."""

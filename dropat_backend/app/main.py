@@ -1,8 +1,4 @@
-"""
-DropAt Backend — FastAPI Application
-────────────────────────────────────
-Main entry point for the REST API.
-"""
+"""Main entry point for the REST API."""
 
 from contextlib import asynccontextmanager
 
@@ -17,7 +13,6 @@ from app.admin.routes import router as admin_router
 from app.core.config import settings
 from app.core.database import async_session_factory, init_db, close_db
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle events for the FastAPI application."""
@@ -26,7 +21,6 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     await close_db()
-
 
 app = FastAPI(
     title="DropAt API",
@@ -57,7 +51,6 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 # Include Admin Panel
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
 
-
 @app.get("/health", tags=["health"])
 async def health_check():
     """Readiness check used by deployment health probes."""
@@ -73,12 +66,10 @@ async def health_check():
         "environment": settings.APP_ENV,
     }
 
-
 @app.get("/health/live", tags=["health"])
 async def liveness_check():
     """Process liveness check that does not depend on external services."""
     return {"status": "ok"}
-
 
 @app.post("/seed", tags=["admin"])
 async def seed_database():
@@ -146,7 +137,6 @@ async def seed_database():
         await session.commit()
 
     return {"status": "seeded", "routes": 2, "vouchers": 2}
-
 
 if __name__ == "__main__":
     import uvicorn

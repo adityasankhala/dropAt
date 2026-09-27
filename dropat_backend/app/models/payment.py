@@ -1,6 +1,5 @@
 """
 Payment Model
-──────────────
 Payment records with Razorpay integration support.
 """
 
@@ -11,7 +10,6 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field
 
-
 class PaymentStatus(str, Enum):
     """Payment lifecycle."""
     CREATED = "created"  # Razorpay order created
@@ -21,7 +19,6 @@ class PaymentStatus(str, Enum):
     REFUNDED = "refunded"  # Fully refunded
     PARTIAL_REFUND = "partial_refund"  # Partially refunded
 
-
 class PaymentMethod(str, Enum):
     """Supported payment methods."""
     CASH = "cash"
@@ -29,7 +26,6 @@ class PaymentMethod(str, Enum):
     CARD = "card"
     WALLET = "wallet"
     NETBANKING = "netbanking"
-
 
 class Payment(SQLModel, table=True):
     """

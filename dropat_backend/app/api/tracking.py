@@ -18,7 +18,6 @@ from app.services.tracking_service import TrackingService
 
 router = APIRouter()
 
-
 @router.post("/update", response_model=LocationResponse)
 async def update_location(
     request: LocationBatchRequest,
@@ -53,7 +52,6 @@ async def update_location(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.get("/trip/{trip_id}", response_model=LocationResponse)
 async def get_trip_location(

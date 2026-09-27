@@ -8,7 +8,6 @@ from app.models.booking import BookingStatus
 from app.models.payment import PaymentMethod
 from app.services.payment_service import PaymentService
 
-
 @pytest.mark.asyncio
 async def test_payment_order_uses_the_server_booking_total(monkeypatch):
     """A client cannot choose the amount charged for a booking."""

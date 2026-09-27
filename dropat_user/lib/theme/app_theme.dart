@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// ==================== COLORS ====================
+// Colors
 class DropAtColors {
   DropAtColors._();
 
@@ -32,7 +32,7 @@ class DropAtColors {
   static const Color darkHeader = Color(0xFF3A5A4C);
 }
 
-// ==================== TEXT STYLES ====================
+// Text Styles
 class DropAtTextStyles {
   DropAtTextStyles._();
 
@@ -127,7 +127,7 @@ class DropAtTextStyles {
   );
 }
 
-// ==================== SPACING ====================
+// Spacing
 class DropAtSpacing {
   DropAtSpacing._();
 
@@ -140,7 +140,7 @@ class DropAtSpacing {
   static const double xxxl = 32;
 }
 
-// ==================== SHADOWS ====================
+// Shadows
 class DropAtShadows {
   DropAtShadows._();
 
@@ -169,7 +169,7 @@ class DropAtShadows {
       ];
 }
 
-// ==================== RADII ====================
+// Radii
 class DropAtRadius {
   DropAtRadius._();
 
@@ -180,7 +180,7 @@ class DropAtRadius {
   static const double round = 100;
 }
 
-// ==================== THEME DATA ====================
+// Theme Data
 class DropAtTheme {
   DropAtTheme._();
 

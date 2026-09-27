@@ -1,216 +1,296 @@
-# DropAt 🚐
+# DropAt — Campus Shuttle Platform
 
-> A multi-service campus mobility app built for students — designed to simplify getting around campus.
+**Connecting smaller cities through organised shuttle networks.**
 
-DropAt is a modern, reliable campus shuttle and ride-hailing platform designed for universities and tight-knit communities. The system comprises a high-performance backend, an intuitive user application, and a dedicated driver application. Developed as a **Project Based Learning (PBL)** initiative at Manipal University Jaipur.
+DropAt is a ride-sharing platform built for Tier 2 and Tier 3 Indian cities where public transport is unreliable and expensive. We start with fixed-route campus shuttles (hostels → colleges → markets → railway stations) and expand into on-demand rides as the network grows.
 
-🏆 **Winner – Project Expo 2025** | Selected from the top 10–15 projects out of 100+ submissions.
+## Why Smaller Cities First?
 
-## 🌟 Key Features
+Big cities already have Ola, Uber, Rapido. But students in Jaipur, Kota, Indore, and Lucknow still depend on overcrowded autos and shared rickshaws with zero tracking, no fixed pricing, and unsafe late-night commutes. DropAt solves this by:
 
-- **Campus Shuttle System**: Fixed-route shuttle tracking and booking.
-- **On-Demand Rides**: (Phase 2) Ride-hailing for personalized routes.
-- **Real-Time Tracking**: Live vehicle tracking using PostGIS and websockets.
-- **Admin Dashboard**: Comprehensive web-based admin panel to manage routes, trips, users, and drivers.
-- **Voucher System**: Built-in promotional and discount system.
-- **Authentication**: Secure sign-up and login for students.
-
-## 🏗️ Architecture / Tech Stack
-
-The project is structured into three main repositories/folders:
-
-### 1. Backend (`/dropat_backend`)
-- **Framework**: Python with [FastAPI](https://fastapi.tiangolo.com/)
-- **Database**: PostgreSQL with PostGIS extension (via `SQLModel` and `GeoAlchemy2`)
-- **Admin Panel**: Jinja2 HTML templates served directly from FastAPI
-- **Containerization**: Docker & Docker Compose
-
-### 2. User App (`/dropat_user`)
-- **Framework**: [Flutter](https://flutter.dev/) (iOS & Android)
-- **Features**: Route browsing, shuttle booking, wallet management, real-time tracking, intuitive UI/UX designed in Figma.
-
-### 3. Driver App (`/dropat_driver`)
-- **Framework**: [Flutter](https://flutter.dev/) (iOS & Android)
-- **Features**: Trip management, route navigation, passenger check-ins, earnings dashboard.
+- **Fixed routes** with known stops, schedules, and fares — no surge pricing
+- **Live GPS tracking** so passengers know exactly where the shuttle is
+- **Seat reservations** to guarantee a spot during peak hours
+- **UPI payments** built in — no cash hassles
+- Starting with college campuses where demand is predictable and dense
 
 ---
 
-## 🚀 Getting Started (First-Time Setup)
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **User App** | Flutter (Dart) — iOS & Android |
+| **Driver App** | Flutter (Dart) — iOS & Android |
+| **Backend API** | FastAPI (Python) |
+| **Database** | PostgreSQL + PostGIS |
+| **Auth** | Firebase Auth (Phone OTP + Google Sign-In) |
+| **Realtime** | Supabase Realtime (live GPS broadcast) |
+| **Payments** | Razorpay (UPI, cards, wallets) |
+| **Maps** | Google Maps SDK + Places API |
+| **Hosting** | Railway / Docker |
+
+---
+
+## Project Structure
+
+```
+lifeproject/
+├── dropat_user/          # Passenger Flutter app
+│   ├── lib/
+│   │   ├── screens/      # All UI screens
+│   │   ├── services/     # API client, auth, shuttle, payments
+│   │   ├── models/       # Data models (ride, shuttle, user, etc.)
+│   │   ├── widgets/      # Reusable UI components
+│   │   ├── providers/    # State management
+│   │   ├── config/       # Environment config
+│   │   └── theme/        # Colors, typography, spacing
+│   └── pubspec.yaml
+│
+├── dropat_driver/        # Driver Flutter app
+│   ├── lib/
+│   │   ├── screens/      # Driver home, ride, earnings, profile
+│   │   ├── services/     # API client, location tracking, auth
+│   │   ├── config/       # Environment config
+│   │   └── theme/        # Driver app theme
+│   └── pubspec.yaml
+│
+├── dropat_backend/       # FastAPI server
+│   ├── app/
+│   │   ├── api/          # REST endpoints (routes, bookings, payments, etc.)
+│   │   ├── models/       # SQLModel ORM models
+│   │   ├── schemas/      # Pydantic request/response schemas
+│   │   ├── services/     # Business logic (booking, payment, tracking)
+│   │   ├── core/         # Config, DB, Firebase auth middleware
+│   │   └── admin/        # Admin dashboard (server-rendered HTML)
+│   ├── migrations/       # Alembic DB migrations
+│   ├── seed.py           # Demo data seeder
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+└── dropat_admin/         # Admin panel templates
+```
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- [Docker & Docker Compose](https://www.docker.com/)
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (for mobile apps)
-- Python 3.11+ (optional, for local backend development without Docker)
 
-### 1. Clone & Setup the Backend
+- **Flutter SDK** 3.x+ — [install guide](https://docs.flutter.dev/get-started/install)
+- **Python 3.11+** — for the backend
+- **PostgreSQL 15+** — local or Docker
+- **Firebase project** — for authentication
+- **Google Maps API key** — for maps and places
+
+### 1. Clone the repo
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-org/lifeproject.git
+git clone https://github.com/adityasankhala/lifeproject.git
 cd lifeproject
+```
 
-# Navigate to backend
+### 2. Backend Setup
+
+```bash
 cd dropat_backend
 
-# Create your environment file from the template
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy env template and fill in your values
 cp .env.example .env
+# Edit .env with your database URL, Firebase project ID, etc.
 
-# Start everything with one command
-make setup
+# Run database migrations
+alembic upgrade head
+
+# Seed demo data (3 shuttle routes in Jaipur)
+python seed.py
+
+# Start the server
+uvicorn app.main:app --reload --port 8000
 ```
 
-This will:
-- Build the Docker containers (FastAPI API + PostgreSQL)
-- Wait for the database to be healthy
-- Seed the database with sample routes and vouchers
+The API will be live at `http://localhost:8000`. Check `http://localhost:8000/docs` for the interactive Swagger UI.
 
-**Verify it's running:**
-```bash
-curl http://localhost:8000/health
-# → {"status":"ok","version":"1.0.0","environment":"development"}
-```
-
-- **API Docs**: http://localhost:8000/docs
-- **Admin Panel**: http://localhost:8000/admin
-
-### 2. Run the Flutter User App
+### 3. User App Setup
 
 ```bash
-cd ../dropat_user
+cd dropat_user
+
+# Install Flutter dependencies
 flutter pub get
-flutter run
+
+# Set up your Google Maps API key in local config:
+# Android: add GOOGLE_MAPS_API_KEY=your-key to android/local.properties
+# iOS: add GOOGLE_MAPS_API_KEY=your-key to ios/Flutter/Secrets.xcconfig
+
+# Run on a connected device or emulator
+flutter run --dart-define=GOOGLE_MAPS_API_KEY=your-key-here
 ```
 
-By default, the app connects to the **production Railway backend**. To connect to your **local Docker backend** instead:
+### 4. Driver App Setup
 
 ```bash
-# Find your computer's local IP address
-# macOS:
-ipconfig getifaddr en0
-# Linux:
-hostname -I | awk '{print $1}'
+cd dropat_driver
 
-# Run Flutter with local backend
-flutter run --dart-define=API_BASE_URL=http://<YOUR-IP>:8000/api/v1
-
-# Example:
-flutter run --dart-define=API_BASE_URL=http://192.168.0.100:8000/api/v1
-```
-
-> **Note for iOS Simulator**: Use `http://localhost:8000/api/v1`  
-> **Note for Android Emulator**: Use `http://10.0.2.2:8000/api/v1`
-
-### 3. Run the Flutter Driver App
-
-```bash
-cd ../dropat_driver
 flutter pub get
-flutter run
+
+# Same key setup as user app (local.properties + Secrets.xcconfig)
+
+flutter run --dart-define=GOOGLE_MAPS_API_KEY=your-key-here
 ```
 
-Same `--dart-define` override applies for local development.
+### 5. Firebase Setup
+
+1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable **Phone Authentication** and **Google Sign-In**
+3. Download `google-services.json` → place in `android/app/`
+4. Download `GoogleService-Info.plist` → place in `ios/Runner/`
+5. Set `FIREBASE_PROJECT_ID` in your backend `.env`
 
 ---
 
-## 🔧 Useful Commands (Backend)
+## API Endpoints
 
-All commands should be run from the `dropat_backend/` directory:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/verify` | Verify Firebase token, create user |
+| `GET` | `/api/v1/routes` | List all shuttle routes |
+| `GET` | `/api/v1/trips?route_id=&date=` | Available trips for a route |
+| `POST` | `/api/v1/bookings` | Book a seat on a shuttle |
+| `GET` | `/api/v1/bookings/me` | My booking history |
+| `DELETE` | `/api/v1/bookings/{id}` | Cancel a booking |
+| `POST` | `/api/v1/payments/create-order` | Create Razorpay payment |
+| `POST` | `/api/v1/payments/verify` | Verify payment callback |
+| `POST` | `/api/v1/tracking/update` | Driver pushes GPS location |
+| `GET` | `/api/v1/tracking/trip/{id}` | Get live shuttle position |
+| `POST` | `/api/v1/drivers/toggle-online` | Driver goes online/offline |
+| `GET` | `/api/v1/vouchers` | Available promo codes |
 
-| Command | Description |
-|---------|-------------|
-| `make setup` | First-time setup (build + seed) |
-| `make dev` | Start Docker containers |
-| `make stop` | Stop all containers |
-| `make logs` | Tail API container logs |
-| `make seed` | Seed database with sample data |
-| `make health` | Check API health |
-| `make rebuild` | Rebuild API after changing `requirements.txt` |
-| `make clean` | Stop containers + delete DB data ⚠️ |
+Full interactive docs at `/docs` (Swagger UI) when running locally.
 
 ---
 
-## 🛠️ Troubleshooting
+## Architecture
 
-### "Network Error" when booking / loading routes
-**Cause**: The app can't reach the backend.  
-**Fix**: 
-1. Check the backend is running: `curl http://localhost:8000/health`
-2. If using a physical device, make sure your phone and computer are on the **same Wi-Fi network**
-3. Use `--dart-define` to point to your local IP (not `localhost`)
+```
+┌─────────────┐     ┌─────────────┐
+│  User App   │     │ Driver App  │
+│  (Flutter)  │     │  (Flutter)  │
+└──────┬──────┘     └──────┬──────┘
+       │  HTTP + JWT       │  HTTP + JWT
+       └────────┬──────────┘
+                │
+         ┌──────▼──────┐
+         │   FastAPI    │
+         │   Backend    │
+         └──────┬──────┘
+                │
+    ┌───────────┼───────────┐
+    │           │           │
+┌───▼───┐ ┌────▼────┐ ┌────▼────┐
+│ Postgres│ │Supabase │ │Razorpay │
+│+PostGIS│ │Realtime │ │Payments │
+└────────┘ └─────────┘ └─────────┘
+```
 
-### Docker containers won't start
+**Auth flow**: Firebase Auth (phone OTP / Google) → JWT token → sent in every API request → backend verifies with Google's public keys.
+
+**Live tracking**: Driver app sends GPS coordinates → backend writes to PostgreSQL → Supabase Realtime broadcasts to all subscribers → user app updates map in real-time.
+
+**Payments**: User selects seat → backend creates Razorpay order → Flutter opens Razorpay checkout → payment verified server-side → booking confirmed.
+
+---
+
+## Database Schema
+
+The schema is designed for shuttle operations now, but the models support on-demand rides when we're ready:
+
+- **users** — profiles synced from Firebase Auth
+- **vehicles** — shuttles (and eventually autos, bikes, cars)
+- **drivers** — linked to users and vehicles
+- **routes** — fixed shuttle routes with names and metadata
+- **waypoints** — stops along a route (with lat/lng coordinates)
+- **trips** — specific departures (e.g., Route A at 8:00 AM today)
+- **bookings** — seat reservations with status tracking
+- **payments** — transaction records with Razorpay integration
+- **location_updates** — GPS pings from drivers (powers live tracking)
+- **vouchers** — promo codes and discounts
+- **reviews** — ratings and feedback
+
+---
+
+## Docker
+
 ```bash
-# Check if port 5432 or 8000 is already in use
-lsof -i :5432
-lsof -i :8000
+cd dropat_backend
 
-# Kill any existing process, then retry
-make dev
+# Run everything (API + PostgreSQL + PostGIS)
+docker-compose up -d
+
+# Or just build the API image
+docker build -t dropat-api .
 ```
-
-### "address already in use" error
-Another process is using port 8000 or 5432. Kill it:
-```bash
-# Find and kill the process on port 8000
-kill -9 $(lsof -t -i :8000)
-make dev
-```
-
-### Flutter app shows demo/fake data
-The app falls back to demo data when it can't reach the backend. This is expected when:
-- The backend is not running
-- Your phone can't resolve the Railway domain (ISP blocking)
-
-Fix: Start the local backend and use `--dart-define` to point to it.
-
-### Firebase / Google Services errors
-Firebase config files are gitignored for security. You need to:
-1. Get `GoogleService-Info.plist` (iOS) from the Firebase Console
-2. Get `google-services.json` (Android) from the Firebase Console
-3. Place them in the correct directories:
-   - iOS: `dropat_user/ios/Runner/GoogleService-Info.plist`
-   - Android: `dropat_user/android/app/google-services.json`
 
 ---
 
-## 🤝 Contributing & Branching Strategy
+## Roadmap
 
-To keep the development process smooth and conflict-free, especially when working in a team, we follow a feature-branching workflow.
+### Phase 1 (Current) — Campus Shuttles
+- [x] Fixed shuttle routes with schedules
+- [x] Seat booking and cancellation
+- [x] Live GPS tracking
+- [x] UPI payments via Razorpay
+- [x] Driver and passenger apps
+- [x] Admin dashboard
 
-### The Golden Rules of Branching
-1. **Never commit directly to `main`**. The `main` branch should always contain stable, working code.
-2. **Create a new branch for every feature or fix**. 
-3. **Use descriptive branch names** (e.g., `feature/user-login`, `fix/map-crash`, `ui/admin-dashboard`).
-
-### Workflow Example
-
-1. **Pull the latest changes** from the main branch to ensure you are up to date:
-   ```bash
-   git checkout main
-   git pull origin main
-   ```
-
-2. **Create a new branch** for your work:
-   ```bash
-   git checkout -b feature/my-awesome-feature
-   ```
-
-3. **Make your changes** and commit them:
-   ```bash
-   git add .
-   git commit -m "Add my awesome feature"
-   ```
-
-4. **Push your branch** to GitHub:
-   ```bash
-   git push origin feature/my-awesome-feature
-   ```
-
-5. **Create a Pull Request (PR)** on GitHub to merge your branch into `main`. Once your teammate reviews and approves it, it can be merged!
-
-## 👥 Team
-
-Developed by **Aditya Saini**, **Arnav Mehrotra** and **Joshua Sherwin Fernandes** 
+### Phase 2 (Next) — On-Demand Rides
+- [ ] Auto-rickshaw and bike taxi booking
+- [ ] Dynamic pricing and driver matching
+- [ ] Wallet system with top-up
+- [ ] Ride sharing / carpooling
+- [ ] Multi-city expansion
 
 ---
-*Built with ❤️ for better campus mobility.*
+
+## Environment Variables
+
+See [`dropat_backend/.env.example`](dropat_backend/.env.example) for the full list. Key ones:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `FIREBASE_PROJECT_ID` | Yes | For JWT verification |
+| `GOOGLE_MAPS_API_KEY` | Yes | Maps and Places API |
+| `RAZORPAY_KEY_ID` | No* | Payment gateway |
+| `RAZORPAY_KEY_SECRET` | No* | Payment gateway |
+| `SUPABASE_URL` | No* | For realtime tracking |
+
+*Required for those features to work. The app runs without them in dev mode.
+
+---
+
+## Contributing
+
+This is a private project built for the DropAt team. If you're a contributor:
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Test locally (`flutter analyze` + `pytest`)
+4. Open a PR
+
+---
+
+## License
+
+Proprietary. All rights reserved.
+
+---
+
+Built with ☕ by the DropAt team from Jaipur, India.

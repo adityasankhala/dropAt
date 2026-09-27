@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class SplashScreen extends StatefulWidget {
   final Widget? nextScreen;
   const SplashScreen({super.key, this.nextScreen});

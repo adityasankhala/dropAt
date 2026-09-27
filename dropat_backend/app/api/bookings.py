@@ -19,7 +19,6 @@ from app.services.booking_service import BookingService
 
 router = APIRouter()
 
-
 def _format_booking_response(booking: Booking) -> BookingResponse:
     return BookingResponse(
         id=booking.id,
@@ -43,7 +42,6 @@ def _format_booking_response(booking: Booking) -> BookingResponse:
         driver_name=None,
         vehicle_number=None,
     )
-
 
 @router.post("/shuttle", response_model=BookingResponse)
 async def book_shuttle(
@@ -78,7 +76,6 @@ async def book_shuttle(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.get("/me", response_model=BookingListResponse)
 async def get_my_bookings(
     booking_type: Optional[str] = None,
@@ -111,7 +108,6 @@ async def get_my_bookings(
         bookings=[_format_booking_response(b) for b in bookings],
         total=total,
     )
-
 
 @router.delete("/{booking_id}", response_model=BookingResponse)
 async def cancel_booking(

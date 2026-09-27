@@ -21,7 +21,6 @@ from app.services.tracking_service import TrackingService
 
 router = APIRouter()
 
-
 async def get_current_driver(
     current_user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
@@ -34,7 +33,6 @@ async def get_current_driver(
     if not driver:
         raise HTTPException(status_code=403, detail="Driver profile not found")
     return driver
-
 
 @router.post("/toggle-online", response_model=DriverStatusResponse)
 async def toggle_online(
@@ -69,7 +67,6 @@ async def toggle_online(
         total_earnings=driver.total_earnings,
         rating=4.9, 
     )
-
 
 @router.get("/manifest/{trip_id}", response_model=TripManifestResponse)
 async def get_trip_manifest(

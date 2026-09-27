@@ -1,8 +1,4 @@
-"""
-DropAt Backend — Async Database Engine
-───────────────────────────────────────
-SQLModel + asyncpg connection pool for PostgreSQL.
-"""
+"""SQLModel + asyncpg connection pool for PostgreSQL."""
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlmodel import SQLModel
@@ -26,7 +22,6 @@ async_session_factory = async_sessionmaker(
     expire_on_commit=False,
 )
 
-
 async def get_session() -> AsyncSession:
     """FastAPI dependency — yields an async database session."""
     async with async_session_factory() as session:
@@ -39,7 +34,6 @@ async def get_session() -> AsyncSession:
         finally:
             await session.close()
 
-
 async def init_db():
     """Create local-development tables only.
 
@@ -51,7 +45,6 @@ async def init_db():
         return
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
-
 
 async def close_db():
     """Dispose of the connection pool on shutdown."""

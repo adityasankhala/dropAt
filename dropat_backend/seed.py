@@ -1,7 +1,4 @@
-"""
-Database Seeder — Real Bagru → Jaipur Routes
-──────────────────────────────────────────────
-Populates the database with actual campus shuttle routes.
+"""Populates the database with actual campus shuttle routes.
 
 ROUTE LOGIC (2 shuttles, optimized):
   College is in Bagru, ~25km west of Jaipur city center.
@@ -15,8 +12,7 @@ ROUTE LOGIC (2 shuttles, optimized):
   Route B (Station Express) — north corridor:
     Bagru → Chandpole → Sindhi Camp → Railway Station
     WHY: Chandpole/Sindhi Camp/Station are clustered in old city.
-          Avoids crossing into the south corridor.
-"""
+          Avoids crossing into the south corridor."""
 
 import asyncio
 from datetime import datetime
@@ -28,7 +24,6 @@ from app.models.route import Route
 from app.models.waypoint import Waypoint
 from app.models.trip import Trip, TripMode
 from app.models.voucher import Voucher
-
 
 async def seed_data():
     """Seed the database with real Bagru-Jaipur shuttle routes."""
@@ -110,7 +105,7 @@ async def seed_data():
 
         session.add_all([wb_1, wb_2, wb_3, wb_4])
 
-        # ── Vouchers ──
+        # Vouchers
         v1 = Voucher(
             code="WELCOME50",
             description="50% off your first ride",
@@ -133,7 +128,6 @@ async def seed_data():
         print("✅ Database seeded with real Bagru → Jaipur routes!")
         print("   Route A (City Express): Bagru → Airport → Malviya Nagar → WTP → C-Scheme")
         print("   Route B (Station Express): Bagru → Chandpole → Sindhi Camp → Railway Station")
-
 
 if __name__ == "__main__":
     asyncio.run(seed_data())

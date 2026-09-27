@@ -1,9 +1,6 @@
 """
 Waypoint Model
-───────────────
 A stop/node along a route.
-Phase 1: Fixed bus stops (is_fixed=True).
-Phase 2: Dynamic user-dropped pins (is_fixed=False).
 """
 
 import uuid
@@ -11,7 +8,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field, Relationship
-
 
 class Waypoint(SQLModel, table=True):
     """

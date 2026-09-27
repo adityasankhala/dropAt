@@ -1,6 +1,5 @@
 """
 Review Model
-─────────────
 Ratings and feedback for completed trips.
 """
 
@@ -9,7 +8,6 @@ from datetime import datetime
 from typing import Optional
 
 from sqlmodel import SQLModel, Field, Relationship
-
 
 class Review(SQLModel, table=True):
     """

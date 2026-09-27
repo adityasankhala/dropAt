@@ -1,14 +1,9 @@
-"""
-DropAt Backend — Core Configuration
-────────────────────────────────────
-Centralized settings loaded from environment variables.
-Uses pydantic-settings for automatic validation and type coercion.
-"""
+"""Centralized settings loaded from environment variables.
+Uses pydantic-settings for automatic validation and type coercion."""
 
 from typing import List
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 class Settings(BaseSettings):
     """Application settings loaded from .env file."""
@@ -20,7 +15,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ── App ──────────────────────────────────────
+    # App
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
@@ -32,7 +27,7 @@ class Settings(BaseSettings):
     TRUSTED_HOSTS: List[str] = []
     AUTO_CREATE_SCHEMA: bool = True
 
-    # ── Database ─────────────────────────────────
+    # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/dropat"
 
     @field_validator("DATABASE_URL", mode="after")
@@ -44,24 +39,24 @@ class Settings(BaseSettings):
             return v.replace("postgresql://", "postgresql+asyncpg://", 1)
         return v
 
-    # ── Supabase ─────────────────────────────────
+    # Supabase
     SUPABASE_URL: str = ""
     SUPABASE_ANON_KEY: str = ""
     SUPABASE_SERVICE_KEY: str = ""
 
-    # ── Firebase Auth ────────────────────────────
+    # Firebase Auth
     FIREBASE_PROJECT_ID: str = "dropat-80f0b"
 
-    # ── Google Maps ──────────────────────────────
+    # Google Maps
     GOOGLE_MAPS_API_KEY: str = ""
 
-    # ── Razorpay ─────────────────────────────────
+    # Razorpay
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
     PAYMENTS_ENABLED: bool = False
     ALLOW_DEV_PAYMENT_FALLBACK: bool = True
 
-    # ── Admin panel ──────────────────────────────
+    # Admin panel
     ADMIN_USERNAME: str = ""
     ADMIN_PASSWORD: str = ""
 
@@ -104,7 +99,6 @@ class Settings(BaseSettings):
     @property
     def is_development(self) -> bool:
         return self.APP_ENV.lower() == "development"
-
 
 # Singleton instance
 settings = Settings()

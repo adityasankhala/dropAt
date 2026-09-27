@@ -1,9 +1,5 @@
-"""
-DropAt Admin Panel — API Routes
-────────────────────────────────
-Admin-only routes for managing routes, trips, drivers, vouchers, and bookings.
-Served via Jinja2 templates at /admin.
-"""
+"""Admin-only routes for managing routes, trips, drivers, vouchers, and bookings.
+Served via Jinja2 templates at /admin."""
 
 import uuid
 from datetime import datetime, date, time
@@ -30,8 +26,7 @@ templates = Jinja2Templates(directory="app/admin/templates")
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
-# ─── Dashboard ───────────────────────────────────────────
+# Dashboard
 
 @router.get("", response_class=HTMLResponse)
 async def admin_dashboard(request: Request, session: AsyncSession = Depends(get_session)):
@@ -65,8 +60,7 @@ async def admin_dashboard(request: Request, session: AsyncSession = Depends(get_
         "recent_bookings": recent_bookings,
     })
 
-
-# ─── Routes Management ──────────────────────────────────
+# Routes Management
 
 @router.get("/routes", response_class=HTMLResponse)
 async def admin_routes(request: Request, session: AsyncSession = Depends(get_session)):
@@ -82,7 +76,6 @@ async def admin_routes(request: Request, session: AsyncSession = Depends(get_ses
         "page": "routes",
         "routes": routes,
     })
-
 
 @router.post("/routes/create")
 async def admin_create_route(
@@ -106,7 +99,6 @@ async def admin_create_route(
     await session.commit()
     return RedirectResponse(url="/admin/routes", status_code=303)
 
-
 @router.post("/routes/{route_id}/toggle")
 async def admin_toggle_route(
     route_id: uuid.UUID,
@@ -121,7 +113,6 @@ async def admin_toggle_route(
         await session.commit()
     return RedirectResponse(url="/admin/routes", status_code=303)
 
-
 @router.post("/routes/{route_id}/delete")
 async def admin_delete_route(
     route_id: uuid.UUID,
@@ -135,8 +126,7 @@ async def admin_delete_route(
         await session.commit()
     return RedirectResponse(url="/admin/routes", status_code=303)
 
-
-# ─── Trips Management ───────────────────────────────────
+# Trips Management
 
 @router.get("/trips", response_class=HTMLResponse)
 async def admin_trips(request: Request, session: AsyncSession = Depends(get_session)):
@@ -160,7 +150,6 @@ async def admin_trips(request: Request, session: AsyncSession = Depends(get_sess
         "routes": routes,
         "trip_statuses": [s.value for s in TripStatus],
     })
-
 
 @router.post("/trips/create")
 async def admin_create_trip(
@@ -193,8 +182,7 @@ async def admin_create_trip(
     await session.commit()
     return RedirectResponse(url="/admin/trips", status_code=303)
 
-
-# ─── Users Management ───────────────────────────────────
+# Users Management
 
 @router.get("/users", response_class=HTMLResponse)
 async def admin_users(request: Request, session: AsyncSession = Depends(get_session)):
@@ -209,8 +197,7 @@ async def admin_users(request: Request, session: AsyncSession = Depends(get_sess
         "users": users,
     })
 
-
-# ─── Drivers Management ─────────────────────────────────
+# Drivers Management
 
 @router.get("/drivers", response_class=HTMLResponse)
 async def admin_drivers(request: Request, session: AsyncSession = Depends(get_session)):
@@ -228,8 +215,7 @@ async def admin_drivers(request: Request, session: AsyncSession = Depends(get_se
         "drivers": drivers,
     })
 
-
-# ─── Bookings Management ────────────────────────────────
+# Bookings Management
 
 @router.get("/bookings", response_class=HTMLResponse)
 async def admin_bookings(request: Request, session: AsyncSession = Depends(get_session)):
@@ -247,8 +233,7 @@ async def admin_bookings(request: Request, session: AsyncSession = Depends(get_s
         "bookings": bookings,
     })
 
-
-# ─── Vouchers Management ────────────────────────────────
+# Vouchers Management
 
 @router.get("/vouchers", response_class=HTMLResponse)
 async def admin_vouchers(request: Request, session: AsyncSession = Depends(get_session)):
@@ -262,7 +247,6 @@ async def admin_vouchers(request: Request, session: AsyncSession = Depends(get_s
         "page": "vouchers",
         "vouchers": vouchers,
     })
-
 
 @router.post("/vouchers/create")
 async def admin_create_voucher(
@@ -293,7 +277,6 @@ async def admin_create_voucher(
     session.add(voucher)
     await session.commit()
     return RedirectResponse(url="/admin/vouchers", status_code=303)
-
 
 @router.post("/vouchers/{voucher_id}/toggle")
 async def admin_toggle_voucher(

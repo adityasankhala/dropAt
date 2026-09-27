@@ -1,6 +1,5 @@
 """
 DropAt Models Package
-─────────────────────
 All SQLModel database models for the DropAt platform.
 Import all models here so SQLModel.metadata.create_all() picks them up.
 """
